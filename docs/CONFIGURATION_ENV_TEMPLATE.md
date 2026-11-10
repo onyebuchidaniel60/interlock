@@ -1,0 +1,32 @@
+# `.env.example` variable template (names only)
+
+```dotenv
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_PROJECT_REF=
+SUPABASE_ACCESS_TOKEN=
+MEMWAL_ACCOUNT_ID=
+MEMWAL_NAMESPACE=
+MEMWAL_SERVER_URL=https://relayer.memory.walrus.xyz
+MEMWAL_SCOUT_DELEGATE_KEY=
+MEMWAL_POLICY_DELEGATE_KEY=
+MEMWAL_SENTINEL_DELEGATE_KEY=
+MEMWAL_RUNNER_DELEGATE_KEY=
+TATUM_API_KEY=
+TATUM_SUI_GRPC_TARGET=sui-mainnet-grpc.gateway.tatum.io
+SUI_DEMO_ADDRESS=
+SUI_COIN_TYPE=0x2::sui::SUI
+OPENAI_API_KEY=
+OPENAI_MODEL=
+OPENAI_MAX_OUTPUT_TOKENS=500
+OPENAI_MAX_DAILY_REQUESTS=20
+OPENAI_MAX_ESTIMATED_DAILY_USD=0
+INTERLOCK_SIGNING_SECRET=
+INTERLOCK_ENVIRONMENT=development
+INTERLOCK_EXECUTION_MODE=simulation
+INTERLOCK_DEMO_BASELINE_ENABLED=false
+APP_BASE_URL=http://localhost:3000
+SENTRY_DSN=
+```
+
+This is a variable-name inventory, not an authorization to create paid accounts or incur usage. Remove unused variables during implementation; never expose server-only values.
