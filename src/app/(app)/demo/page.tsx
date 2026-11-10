@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ArrowRight, FlaskConical, LockKeyhole, Split, TriangleAlert } from "lucide-react";
 
 import { runDemoComparisonAction } from "@/app/(app)/actions";
@@ -29,9 +30,12 @@ export default async function DemoPage({
   searchParams: Promise<{ planId?: string; decisionId?: string; error?: string }>;
 }) {
   const params = await searchParams;
-  const { user, workspace } = await requireWorkspace();
   const config = readRuntimeConfig();
-  const available = config.INTERLOCK_ENVIRONMENT !== "production" && config.INTERLOCK_DEMO_BASELINE_ENABLED;
+  if (config.INTERLOCK_ENVIRONMENT === "production" || !config.INTERLOCK_DEMO_BASELINE_ENABLED) {
+    notFound();
+  }
+  const { user, workspace } = await requireWorkspace();
+  const available = true;
   const error = params.error ? errors[params.error] ?? errors.UNEXPECTED : null;
 
   const plan = params.planId ? await getPlanDetail(user.id, workspace.id, params.planId) : null;
