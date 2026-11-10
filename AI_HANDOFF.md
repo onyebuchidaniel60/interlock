@@ -3,10 +3,10 @@
 ## Current status
 
 - Product: **Interlock** — one agent's verified memory can prevent another agent from executing a policy-violating action.
-- Implementation phase: **Phase 8 complete — reviewed 109.36-second demo video produced.**
+- Implementation phase: **Phase 9 complete for preview release; production release BLOCKED by missing separate production Neon/Walrus credentials and backup path.**
 - Application: authenticated operations console with live Tatum, Walrus, Sentinel and Runner flows.
 - Repository: `https://github.com/onyebuchidaniel60/interlock`, branch `main`.
-- Phase 4: **`5c03b94`**; Phase 5: **`d141f0c`**; Phase 6: **`a8aa450`**; Phase 7: **`a609b8c`**; Phase 8 docs commit follows.
+- Phase 4: **`5c03b94`**; Phase 5: **`d141f0c`**; Phase 6: **`a8aa450`**; Phase 7: **`a609b8c`**; Phase 8: **`0fa8015`**; Phase 9 release commit follows.
 - Preview URL: **https://interlock-w9g75cpnj-uhhh2.vercel.app**
 - Deployed source commit: **`a8aa450`**; target: preview.
 - Protection: **Vercel Authentication**; public requests `302` to Vercel SSO; automation bypass empty.
@@ -19,6 +19,25 @@
 - Groq Analyst: adapter with deterministic fallback; no policy authority; not required for safety.
 - Production: not deployed; bounded Phase 9 release only.
 - Budget: **$0 unapproved spend; free tiers only.**
+
+## Phase 9 final verification
+
+- `npm run typecheck` PASS; `npm run lint` PASS; `npm test` 14/14 PASS.
+- `npm run test:integration` 6/6 PASS (RLS, live Tatum, live Walrus decision pipeline, replay block).
+- Public shell E2E 10/10 PASS; authenticated live-data E2E 6/6 PASS; responsive authenticated pages 6/6 PASS at 390/768/1280.
+- Live Memory OFF/ON comparison PASS on desktop (mobile skips live provider mutation).
+- `npm run build` PASS.
+- `npm audit --omit=dev` 0 vulnerabilities after upgrading `@grpc/grpc-js` to 1.14.7.
+- Tracked-content secret scan clean across 158 text files.
+- Security headers verified: nosniff, frame deny, strict referrer, restrictive permissions policy, no-store health.
+- Preview remains Vercel Authentication protected; public requests 302 to SSO; `protectionBypass` empty.
+- Demo video 109.36s, H.264/AAC, captions, Kokoro `af_bella`; playback/audio verified.
+
+## Production release status
+
+**BLOCKED — no production release performed.** The bounded authority allows a Vercel production deployment and production Neon migrations only after a separate production Neon project/branch, production Managed Auth configuration, production Walrus namespace (`interlock-prod`) and a verified backup/rollback path exist. None of those production credentials/configurations were provided; preview secrets/database must not be reused.
+
+Minimum operator action: provide a separate production Neon project/branch connection URLs (`DATABASE_URL_UNPOOLED`/`DATABASE_URL_APP`), production Managed Better Auth env, verified backup/restore procedure, and confirm `interlock-prod` Walrus configuration. Then run migrations as `neondb_owner`, verify `app_user`/RLS, add production-only Vercel env, and deploy with `INTERLOCK_DEMO_BASELINE_ENABLED=false`.
 
 ## Phase 8 delivered
 
@@ -90,16 +109,9 @@
 6. Production startup fails if the demo baseline is enabled or execution mode is not simulation.
 7. Runner clearance is HMAC-signed, 60 seconds max, plan/workspace/decision-bound and one-time via unique constraints.
 
-## Next task — Phase 9
+## Next task — operator production inputs
 
-Run the final regression, security and release-readiness gate:
-
-1. Re-run typecheck, lint, unit, integration, public shell, authenticated, responsive and live comparison tests.
-2. Run dependency/security audit and staged-content secret scan; verify security headers and RLS role.
-3. Verify preview protection and latest preview commit.
-4. Attempt the bounded production release only if a separate production Neon project/branch, production secrets and a verified backup/rollback path exist. If they do not, stop and report the exact missing inputs; never reuse preview secrets or the preview database for production.
-5. Update AI_HANDOFF/BUILD_LOG and commit `chore: final regression and release readiness`.
-6. Report final status, preview URL/commit, tests, known limitations and production blocker if any.
+Provide the production inputs listed above; otherwise the preview release is complete. After inputs arrive: apply migrations as `neondb_owner`, verify `app_user`/RLS, set production-only Vercel env, deploy production, smoke-test health/auth/readiness, verify public protection/domain policy, and record the release in AI_HANDOFF/BUILD_LOG.
 
 ## Known issues / limitations
 

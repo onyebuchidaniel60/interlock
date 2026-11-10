@@ -427,3 +427,30 @@ Artifacts: demo/interlock-demo.mp4, demo/narration.md, demo/captions.srt, demo/p
 Raw capture ignored under demo/raw/; narration.wav ignored.
 Next task: Phase 9 — final regression/security/release readiness.
 ```
+
+## Phase 9 — final regression, security and release readiness
+
+```text
+Date/time: 2026-11-10T09:50Z
+Phase: Phase 9 — final regression, security and authorized release
+Release commit: follows this entry
+Verification:
+  - npm run typecheck PASS
+  - npm run lint PASS
+  - npm test 14/14 PASS
+  - npm run test:integration 6/6 PASS (Neon RLS, Tatum, Walrus pipeline, replay)
+  - public shell E2E 10/10 PASS
+  - authenticated live-data E2E 6/6 PASS
+  - responsive authenticated E2E 6/6 PASS (390/768/1280)
+  - live Memory OFF/ON comparison PASS desktop (mobile skips provider mutation)
+  - npm run build PASS
+  - npm audit --omit=dev: 0 vulnerabilities after @grpc/grpc-js 1.14.7
+  - secret scan: no tracked secret values/private keys across 158 text files
+  - security headers verified on local production server
+  - preview public requests 302 to Vercel SSO; protectionBypass empty
+  - demo 109.36s; Kokoro af_bella; H.264/AAC + captions
+Production release: BLOCKED — no separate production Neon project/branch, production Managed Auth config, production Walrus namespace credentials or verified backup/rollback path. No production deployment or migration performed; preview secrets not reused.
+Minimum operator action: provide production Neon URLs/roles/auth env, backup/restore verification, and confirm interlock-prod Walrus config.
+Next task: production inputs or preview release sign-off.
+Authorization boundary: production remains bounded to Phase 9 and unexercised.
+```

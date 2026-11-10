@@ -19,7 +19,7 @@
     "check": "npm run typecheck && npm run lint && npm run test"
   },
   "dependencies": {
-    "@grpc/grpc-js": "^1.14.0",
+    "@grpc/grpc-js": "^1.14.7",
     "@grpc/proto-loader": "^0.8.0",
     "@mysten-incubation/memwal": "^0.1.14",
     "@neon/auth": "^0.8.2",

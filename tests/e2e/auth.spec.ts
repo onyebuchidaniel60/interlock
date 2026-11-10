@@ -52,7 +52,7 @@ test.describe("authenticated workspace", () => {
     await page.getByRole("link", { name: /APPROVE|REJECT|HOLD/ }).first().click();
     await expect(page.getByRole("heading", { level: 1, name: "Decision detail" })).toBeVisible({ timeout: 20_000 });
     await expect(page.getByRole("heading", { name: "Cited evidence" })).toBeVisible();
-    await expect(page.getByText(/Simulated once|Simulate once/)).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Runner simulation" })).toBeVisible();
   });
 
   test("primary navigation works with a real session", async ({ page }) => {
