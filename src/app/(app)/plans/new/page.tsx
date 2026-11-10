@@ -4,7 +4,7 @@ import { ArrowLeft, Calculator, Clock3, Hash, ShieldAlert } from "lucide-react";
 
 import { createPlanAction } from "@/app/(app)/actions";
 import { SubmitButton } from "@/components/submit-button";
-import { ButtonLink, EmptyState, PageHeader, PlaceholderPanel } from "@/components/ui";
+import { ButtonLink, EmptyState, PageHeader } from "@/components/ui";
 import { formatDate, formatMist, shortId } from "@/lib/format";
 import { listObservations } from "@/lib/queries";
 import { requireWorkspace } from "@/lib/workspace";
@@ -170,11 +170,7 @@ export default async function NewPlanPage({
         </div>
       )}
 
-      <PlaceholderPanel
-        phase="Phase 4"
-        title="Analyst explanation is optional"
-        description="When authorized, Analyst drafts explanatory text only. It cannot alter amount, exposure, policy or verdict."
-      />
+
     </div>
   );
 }

@@ -462,3 +462,29 @@ Authorization boundary: production remains bounded to Phase 9 and unexercised.
 - Health: `{"status":"ok","service":"interlock","phase":"9","mode":"simulation"}`.
 - Public access: `302` to Vercel SSO; Vercel Authentication enabled; `protectionBypass` empty.
 - Production: not deployed; production Neon/Walrus credentials and backup path missing.
+
+## Submission-readiness finalization
+
+```text
+Date/time: 2026-11-10T17:35Z
+Phase: Finalization pass (submission readiness)
+Changes:
+  - README restructured: product summary + Quick Start + click path + architecture/development/configuration/testing/deployment/troubleshooting.
+  - Removed decorative surface gradients, body glow, blur effects and dashed empty-state styling.
+  - Added copyable provenance values and a Tatum anchor panel to the decision evidence view.
+  - Restyled simulation messaging into a persistent footer line and an adjacent execution chip; labels retained.
+  - Removed stale Phase labels/placeholders from live screens.
+  - Added session persistence/logout/expiry and invited-member E2E tests.
+  - Added a live stale-observation HOLD integration test.
+Findings:
+  - Fresh login, reload, logout, re-login, cleared-session redirect and invited OPERATOR access pass.
+  - No architecture-level login defect reproduced; cookie/session behavior is correct on the protected preview.
+  - Public production URL is blocked: interlock.vercel.app is an unrelated app; no production Vercel env or production Neon/Walrus/backup inputs exist.
+Tests:
+  - Typecheck/lint/build PASS
+  - 14 unit; 7 integration; 10 public shell; 6 authenticated; 6 responsive; session tests; live demo desktop PASS
+  - npm audit --omit=dev: 0 vulnerabilities
+  - secret scan: no tracked credentials/private keys
+  - security headers verified
+Production: not deployed; no migration; preview secrets not reused.
+```

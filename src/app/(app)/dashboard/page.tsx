@@ -209,7 +209,7 @@ export default async function DashboardPage() {
           <SectionHeading
             title="Provider readiness"
             description="Credentials are server-only. This panel never prints secret values."
-            action={<Badge tone="info">Phase 2</Badge>}
+            action={<Badge tone="accent">Live</Badge>}
           />
           <div className="mt-3">
             <StatusRow
@@ -228,7 +228,7 @@ export default async function DashboardPage() {
               label="Tatum Sui gRPC"
               value="Live"
               tone="accent"
-              detail="Non-zero funded demo observation verified in Phase 3."
+              detail="Non-zero funded mainnet observation verified."
             />
             <StatusRow
               label="Groq Analyst"
@@ -254,7 +254,7 @@ export default async function DashboardPage() {
             },
             {
               icon: CheckCircle2,
-              title: "Simulation only",
+              title: "Execution simulated",
               body: "No wallet custody, signing or transaction submission.",
             },
             {

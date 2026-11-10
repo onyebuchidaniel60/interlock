@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Brain, Database, Hash, ShieldCheck } from "lucide-react";
 
-import { Badge, EmptyState, PageHeader, PlaceholderPanel } from "@/components/ui";
+import { Badge, EmptyState, PageHeader } from "@/components/ui";
 import { formatDate, shortId } from "@/lib/format";
 import { listMemories } from "@/lib/queries";
 import { requireWorkspace } from "@/lib/workspace";
@@ -122,11 +122,12 @@ export default async function MemoryPage() {
         })}
       </div>
 
-      <PlaceholderPanel
-        phase="Phase 5"
-        title="Evidence detail link"
-        description="Each record will open a dedicated evidence panel with the full canonical payload, author/namespace/blob provenance and recall result."
-      />
+      <section className="surface p-5">
+        <h2 className="text-sm font-semibold text-ink">Provenance discipline</h2>
+        <p className="mt-2 max-w-3xl text-xs leading-5 text-muted">
+          A ledger row is a pointer, never proof. Canonical content lives on Walrus; Sentinel verifies record ID, namespace, author, blob, content hash and recall before citing it.
+        </p>
+      </section>
     </div>
   );
 }

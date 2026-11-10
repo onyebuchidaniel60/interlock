@@ -78,3 +78,11 @@ For authenticated E2E, create a Playwright storage state after signing in and se
 - **Walrus write pending/failed** — memory remains PENDING/FAILED, never ACTIVE. Check namespace/delegate/relayer.
 
 See `docs/TROUBLESHOOTING.md` for more.
+
+## Session behavior and login checks
+
+- Managed Better Auth sessions persist across reloads; the proxy refreshes cached session data from the session token.
+- Sign-out is performed through `/api/auth` on the client so the upstream cookie is cleared.
+- A cleared/expired session redirects to `/login`; after sign-in the app goes to the requested safe path when it is preserved, otherwise the dashboard. Middleware does not preserve the previous path on expiry by design.
+- Invite acceptance requires the signed-in email to match the invitation email; the invited account receives the assigned OPERATOR/OBSERVER role.
+- Session, reload, logout, expiry and invited-member checks are in `tests/e2e/session.spec.ts`.

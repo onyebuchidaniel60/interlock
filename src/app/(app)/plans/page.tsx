@@ -34,6 +34,7 @@ export default async function PlansPage() {
             <Badge tone="neutral" dot>
               {plans.length} plans
             </Badge>
+            <Badge tone="neutral">Execution: simulated</Badge>
             <ButtonLink href="/plans/new">
               Create plan <ArrowRight className="size-3.5" aria-hidden="true" />
             </ButtonLink>

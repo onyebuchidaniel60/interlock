@@ -11,7 +11,7 @@ test.describe("authenticated workspace", () => {
   test.beforeEach(async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "chromium", "Desktop auth coverage; mobile shell is covered separately.");
     await page.goto("/dashboard", { waitUntil: "domcontentloaded", timeout: 45_000 });
-    await expect(page.getByText("Interlock · Phase 2 auth").first()).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText("Interlock · verified memory gate").first()).toBeVisible({ timeout: 20_000 });
   });
 
   test("dashboard renders the real workspace and role", async ({ page }) => {

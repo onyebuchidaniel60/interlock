@@ -57,7 +57,7 @@ export default async function LoginPage({
       </div>
 
       <p className="mt-5 border-t border-line pt-4 text-[11px] leading-5 text-faint">
-        <Badge tone="info">Phase 2</Badge> Application sessions are now managed by Neon. Workspace data is protected by
+        <Badge tone="accent">Verified session</Badge> Sessions are managed by Neon. Workspace data is protected by
         PostgreSQL RLS and a dedicated <code className="font-mono text-ink">app_user</code> role.
       </p>
     </AuthShell>

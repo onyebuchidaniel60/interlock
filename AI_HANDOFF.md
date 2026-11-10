@@ -20,6 +20,16 @@
 - Production: not deployed; bounded Phase 9 release only.
 - Budget: **$0 unapproved spend; free tiers only.**
 
+## Submission-readiness finalization
+
+- README restructured with a judge-facing one-paragraph summary and a Quick Start click path with expected outcomes. Public production URL is explicitly marked blocked because `interlock.vercel.app` is an unrelated app.
+- UI pass applied StageShow restraint/hierarchy guidance: solid surfaces instead of decorative gradients, removed blur/shadow flourishes, calmer verdict typography with saturated color reserved for badges, constrained tables, intentional empty states, copyable evidence provenance and a Tatum anchor panel.
+- Simulation messaging retained and restyled: persistent footer line, subtle `Execution: simulated · no funds move` chip at the Runner control, no removal of API/evidence/verdict labels.
+- Login behavior exercised end to end: fresh login, reload persistence, logout, login again, cleared-session redirect, and invited OPERATOR account. No architecture-level auth quirk was found; no auth-model change made.
+- Full finalization tests: 14 unit, 7 integration, 10 public shell, 6 authenticated live-data, 6 responsive, session checks and live Memory OFF/ON comparison. `npm audit --omit=dev` 0 vulnerabilities; secret scan clean; security headers verified.
+- Demo video unchanged (approved): `demo/interlock-demo.mp4`, 109.36s.
+- Production remains BLOCKED; no production deploy or migration performed. See the production blocker below.
+
 ## Phase 9 final verification
 
 - `npm run typecheck` PASS; `npm run lint` PASS; `npm test` 14/14 PASS.

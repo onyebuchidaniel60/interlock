@@ -98,4 +98,29 @@ describe.skipIf(!email || !address || !connectionString)("live Interlock decisio
     },
     240_000,
   );
+
+  it(
+    "holds when the observation is stale",
+    async () => {
+      const observation = await createObservation(actor, address!);
+      const plan = await createPlan(actor, {
+        observationId: observation.observationId,
+        amountMist: "50000000",
+        exposureBps: 500,
+        rationale: "Synthetic stale-observation HOLD test.",
+      });
+
+      await client.query("update public.chain_observations set observed_at = now() - interval '10 minutes' where id = $1", [
+        observation.observationId,
+      ]);
+      await client.query("update public.action_plans set created_at = now() - interval '10 minutes' where id = $1", [
+        plan.planId,
+      ]);
+
+      const decision = await evaluatePlanById(actor, plan.planId);
+      expect(decision.verdict).toBe("HOLD");
+      expect(["OBSERVATION_STALE", "PLAN_STALE"]).toContain(decision.reasonCode);
+    },
+    240_000,
+  );
 });

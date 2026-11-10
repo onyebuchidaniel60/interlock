@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, CheckCircle2, FileSearch, ShieldAlert, ShieldCheck, WalletCards } from "lucide-react";
 
 import { simulateDecisionAction } from "@/app/(app)/actions";
+import { CopyValue } from "@/components/copy-value";
 import { SubmitButton } from "@/components/submit-button";
 import { Badge, ButtonLink, PageHeader, StatusRow } from "@/components/ui";
 import { formatBps, formatDate, formatMist, shortId } from "@/lib/format";
@@ -75,9 +76,7 @@ export default async function DecisionDetailPage({
           <div className="flex flex-wrap items-start justify-between gap-4 border-b border-line pb-4">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-faint">Verdict</p>
-              <p className={`mt-1 text-3xl font-semibold ${decision.verdict === "APPROVE" ? "text-accent" : decision.verdict === "REJECT" ? "text-danger" : "text-warn"}`}>
-                {decision.verdict}
-              </p>
+              <p className="mt-1 text-3xl font-semibold text-ink">{decision.verdict}</p>
               <p className="mt-2 max-w-xl text-sm leading-6 text-muted">{decision.explanation}</p>
             </div>
             <Badge tone="neutral">{decision.reason_code}</Badge>
@@ -100,10 +99,17 @@ export default async function DecisionDetailPage({
 
           <div className="mt-4">
             <StatusRow label="Decision state" value={decision.status} tone={decision.status === "FINAL_APPROVED" ? "accent" : decision.status === "FINAL_REJECTED" ? "danger" : "warn"} />
-            <StatusRow label="Plan hash" value={shortId(decision.plan_hash, 18)} tone="neutral" />
-            <StatusRow label="Evaluation hash" value={shortId(decision.evaluation_hash, 18)} tone="neutral" />
-            <StatusRow label="VERDICT memory" value={decision.verdict_memory_id ? shortId(decision.verdict_memory_id, 18) : "Missing"} tone={decision.verdict_memory_id ? "accent" : "danger"} />
             <StatusRow label="Finalized" value={formatDate(decision.finalized_at)} tone="neutral" />
+          </div>
+
+          <div className="mt-4 rounded-xl border border-line bg-white/[0.02] p-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-faint">Provenance</p>
+            <div className="mt-2 space-y-2">
+              <CopyValue label="plan hash" value={decision.plan_hash} full />
+              <CopyValue label="evaluation hash" value={decision.evaluation_hash} full />
+              <CopyValue label="VERDICT memory" value={decision.verdict_memory_id} full />
+              <CopyValue label="wallet address" value={decision.address} full />
+            </div>
           </div>
 
           <div className="mt-5">
@@ -143,8 +149,12 @@ export default async function DecisionDetailPage({
                           </Badge>
                         </td>
                         <td className="py-3 pr-4 text-muted">{row.author_type ?? "—"}</td>
-                        <td className="py-3 pr-4 font-mono text-[10px] text-muted">{shortId(row.blob_id, 18)}</td>
-                        <td className="py-3 font-mono text-[10px] text-faint">{shortId(row.content_hash, 16)}</td>
+                        <td className="py-3 pr-4">
+                          <CopyValue label={`${row.evidence_role} blob`} value={row.blob_id} />
+                        </td>
+                        <td className="py-3">
+                          <CopyValue label={`${row.evidence_role} hash`} value={row.content_hash} />
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -172,6 +182,10 @@ export default async function DecisionDetailPage({
             ) : canSimulate ? (
               <form action={simulateDecisionAction} className="mt-3">
                 <input type="hidden" name="decisionId" value={decision.id} />
+                <div className="mb-3 inline-flex items-center rounded-full border border-line bg-white/[0.03] px-2.5 py-1 text-[10px] font-medium text-muted">
+                  Execution: simulated · no funds move
+                </div>
+                <br />
                 <SubmitButton pendingLabel="Consuming clearance…">Simulate once</SubmitButton>
                 <p className="mt-2 text-[10px] leading-5 text-faint">
                   The server verifies the VERDICT memory again, mints a 60-second single-use clearance and atomically consumes it. No transaction is submitted.
@@ -188,10 +202,27 @@ export default async function DecisionDetailPage({
           <section className="surface p-5">
             <div className="flex items-center gap-2">
               <ShieldCheck className="size-4 text-accent" aria-hidden="true" />
+              <h2 className="text-sm font-semibold text-ink">Tatum anchor</h2>
+            </div>
+            <p className="mt-2 text-xs leading-5 text-muted">
+              The plan&apos;s balance observation is immutable and provider-stamped. No checkpoint or finality field is invented.
+            </p>
+            <div className="mt-3 space-y-2">
+              <StatusRow label="Provider" value={decision.provider} tone="neutral" />
+              <StatusRow label="Method" value={decision.method} tone="neutral" />
+              <StatusRow label="Balance" value={formatMist(decision.balance_mist)} tone="neutral" />
+              <StatusRow label="Observed" value={formatDate(decision.observed_at)} tone="neutral" />
+              <CopyValue label="observation ID" value={decision.observation_id} full />
+            </div>
+          </section>
+
+          <section className="surface p-5">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="size-4 text-accent" aria-hidden="true" />
               <h2 className="text-sm font-semibold text-ink">Safety boundary</h2>
             </div>
             <ul className="mt-3 space-y-2 text-xs leading-5 text-muted">
-              <li>Simulation only. No custody, signing, transfers or trades.</li>
+              <li>Execution simulated. No custody, signing, transfers or trades.</li>
               <li>One execution per decision; the unique constraint blocks replay.</li>
               <li>Missing policy or unverified memory is HOLD, never APPROVE.</li>
             </ul>

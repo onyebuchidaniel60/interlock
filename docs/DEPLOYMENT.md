@@ -58,3 +58,12 @@ Production is allowed only after every Phase 9 condition passes:
 ## Release evidence
 
 Record URL, commit, environment, migration versions, smoke tests, security results, known issues and rollback steps in `AI_HANDOFF.md` and `docs/BUILD_LOG.md`.
+
+## Submission-readiness blocker (2026-11-10)
+
+- `https://interlock.vercel.app` is **not this project**. It resolves to an unrelated Vercel application; the project has no alias/domain for it.
+- No production-only Vercel environment exists. `vercel env ls` shows only Preview values.
+- No separate production Neon project/branch, production Managed Auth configuration, `interlock-prod` Walrus configuration or verified backup/rollback path has been supplied.
+- No `vercel deploy --prod` was performed and no production migration was run. Preview secrets/database were not reused for production.
+
+Minimum inputs to unblock: a domain owned by this Vercel project (or an approved alternate public URL), production Neon URLs/roles, production Auth env, confirmed `interlock-prod` Walrus config, and backup/restore verification.

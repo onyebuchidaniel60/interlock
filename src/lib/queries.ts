@@ -58,6 +58,11 @@ export type DecisionRow = {
   amount_mist: string;
   exposure_bps: number;
   address: string;
+  observation_id: string;
+  balance_mist: string;
+  observed_at: Date;
+  provider: string;
+  method: string;
   execution_id: string | null;
   execution_status: string | null;
   execution_at: Date | null;
@@ -222,7 +227,7 @@ export async function getDecisionDetail(userId: string, workspaceId: string, dec
     const decision = await client.query<DecisionRow>(
       `select d.id, d.verdict, d.status, d.reason_code, d.explanation, d.plan_hash, d.evaluation_hash,
               d.cited_record_ids, d.cited_blob_ids, d.verdict_memory_id, d.finalized_at, d.created_at,
-              d.plan_id, p.amount_mist, p.exposure_bps, o.address,
+              d.plan_id, p.amount_mist, p.exposure_bps, o.address, o.id as observation_id, o.balance_mist, o.observed_at, o.provider, o.method,
               e.id as execution_id, e.status as execution_status, e.simulated_at as execution_at
        from public.decision_records d
        join public.action_plans p on p.id=d.plan_id

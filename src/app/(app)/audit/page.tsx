@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { ClipboardList, History, LockKeyhole, ScrollText } from "lucide-react";
 
-import { Badge, EmptyState, PageHeader, PlaceholderPanel } from "@/components/ui";
+import { Badge, EmptyState, PageHeader } from "@/components/ui";
 import { formatDate, shortId } from "@/lib/format";
 import { listAuditEvents } from "@/lib/queries";
 import { requireWorkspace } from "@/lib/workspace";
@@ -69,11 +69,11 @@ export default async function AuditPage() {
         </section>
       )}
 
-      <PlaceholderPanel
-        phase="Phase 7"
-        title="Event detail drawer"
-        description="The final interface will open a redacted event detail panel with correlation IDs and resource links. No secrets or private provider headers are stored in audit metadata."
-      >
+      <section className="surface p-5">
+        <h2 className="text-sm font-semibold text-ink">Audit integrity</h2>
+        <p className="mt-2 max-w-3xl text-xs leading-5 text-muted">
+          Events are append-only for application roles. Metadata is redacted; provider keys, tokens and private headers are never stored.
+        </p>
         <div className="grid gap-3 sm:grid-cols-3">
           {[
             { icon: History, title: "Lifecycle", body: "Memory pending → active → quarantined/superseded." },
@@ -90,7 +90,7 @@ export default async function AuditPage() {
             );
           })}
         </div>
-      </PlaceholderPanel>
+      </section>
     </div>
   );
 }

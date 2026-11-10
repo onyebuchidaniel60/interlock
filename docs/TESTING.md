@@ -86,3 +86,21 @@ Every test command, environment and result must be recorded in `docs/BUILD_LOG.m
 ## Functionality gate before visual refinement
 
 All MVP unit/integration tests pass, critical E2E journeys pass on protected preview, no critical/high functional or security issue remains, preview URL/deployed commit and known limitations are recorded, and production integrations remain disabled. Only then proceed to Phase 6 final visual refinement.
+
+## Finalization test evidence (Phase 9 / submission readiness)
+
+```bash
+npm run check                 # typecheck + lint + 14 unit tests
+npm run test:integration      # 7 tests: RLS, live Tatum, REJECT/APPROVE/replay, live HOLD
+npm run test:e2e -- tests/e2e/shell.spec.ts       # 10 passed
+npm run test:e2e -- tests/e2e/auth.spec.ts        # 6 passed (desktop live-data coverage)
+npm run test:e2e -- tests/e2e/responsive-auth.spec.ts # 6 passed at 390/768/1280
+npm run test:e2e -- tests/e2e/session.spec.ts     # login reload/logout/expiry + invited member
+E2E_LIVE_DEMO=1 npm run test:e2e -- tests/e2e/live-demo.spec.ts # desktop Memory OFF/ON pass
+```
+
+- HOLD is verified live with a stale observation (`OBSERVATION_STALE` / `PLAN_STALE`) and in unit tests for missing policy/stale/unverified evidence.
+- Runner simulation is verified once; replay returns `ALREADY_SIMULATED`.
+- Login tests cover fresh login → reload → logout → login again, cleared-session redirect → login, and an invited second account.
+- `/demo` remains preview-only by runtime guard; production is not deployed, so the production 403/404 smoke test could not be run.
+- Production `/api/health` smoke test could not be run because production is not deployed.

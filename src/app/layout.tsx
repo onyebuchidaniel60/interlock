@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     template: "%s · Interlock",
   },
   description:
-    "Interlock prevents a policy-violating agent action unless verified shared memory supports it. Preview shell; simulation only.",
+    "Interlock prevents a policy-violating agent action unless verified shared memory supports it. Verified memory execution gate; simulation only.",
   applicationName: "Interlock",
   icons: [{ rel: "icon", url: "/icon.svg", type: "image/svg+xml" }],
 };

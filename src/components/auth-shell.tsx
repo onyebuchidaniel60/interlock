@@ -14,10 +14,6 @@ export function AuthShell({
 }) {
   return (
     <main className="relative min-h-dvh overflow-hidden">
-      <div
-        className="pointer-events-none absolute inset-0 grid-wash opacity-40"
-        aria-hidden="true"
-      />
       <div className="relative mx-auto grid min-h-dvh w-full max-w-6xl items-center gap-10 px-5 py-10 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-8">
         <section className="hidden lg:block">
           <div className="inline-flex items-center gap-2.5">
@@ -79,7 +75,7 @@ export function AuthShell({
               Documentation
               <ArrowUpRight className="size-3" aria-hidden="true" />
             </a>
-            <span>Simulation only · no custody or signing</span>
+            <span>Execution simulated · no funds move</span>
           </div>
         </section>
 

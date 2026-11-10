@@ -5,7 +5,7 @@ import { Database, KeyRound, MailPlus, ServerCog, ShieldCheck, UsersRound } from
 import { createPolicyAction } from "@/app/(app)/actions";
 import { createInviteAction } from "@/app/auth-actions";
 import { SubmitButton } from "@/components/submit-button";
-import { Badge, PageHeader, PlaceholderPanel, StatusRow } from "@/components/ui";
+import { Badge, PageHeader, StatusRow } from "@/components/ui";
 import { readRuntimeConfig } from "@/lib/config";
 import { formatBps, formatDate, shortId } from "@/lib/format";
 import { listActiveConstraints } from "@/lib/queries";
@@ -303,9 +303,9 @@ export default async function SettingsPage({
             <StatusRow label="Neon Postgres" value="Connected" tone="accent" detail="Application role app_user; migrations use a separate owner role." />
             <StatusRow label="Managed Better Auth" value="Connected" tone="accent" detail="Server-verified sessions; invite-only workspace access." />
             <StatusRow label="Row-level security" value="Enforced" tone="accent" detail="Plain PostgreSQL policies; auth.uid() is not used." />
-            <StatusRow label="Walrus Memory" value="Adapter pending" tone="accent" detail="Phase 3." />
-            <StatusRow label="Tatum Sui gRPC" value="Adapter pending" tone="accent" detail="Phase 3." />
-            <StatusRow label="Groq Analyst" value="Phase 3" tone="neutral" detail="No policy authority." />
+            <StatusRow label="Walrus Memory" value="Live" tone="accent" detail="Signed writes + verified recall." />
+            <StatusRow label="Tatum Sui gRPC" value="Live" tone="accent" detail="Funded mainnet read verified." />
+            <StatusRow label="Groq Analyst" value="Fallback ready" tone="neutral" detail="No policy authority." />
           </div>
         </section>
 
@@ -333,11 +333,7 @@ export default async function SettingsPage({
         </section>
       </div>
 
-      <PlaceholderPanel
-        phase="Phase 3"
-        title="Provider adapters are not active"
-        description="Walrus, Tatum and Groq integrations land in Phase 3. Settings will show verified readiness, not just configured names."
-      />
+
     </div>
   );
 }

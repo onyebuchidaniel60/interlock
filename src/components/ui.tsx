@@ -128,8 +128,8 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex min-h-56 flex-col items-center justify-center rounded-xl border border-dashed border-line-strong bg-white/[0.012] px-6 py-10 text-center">
-      <span className="grid size-11 place-items-center rounded-full border border-line-strong bg-white/[0.03] text-muted">
+    <div className="flex min-h-56 flex-col items-center justify-center rounded-xl border border-line bg-white/[0.012] px-6 py-10 text-center">
+      <span className="grid size-11 place-items-center rounded-full border border-line bg-white/[0.03] text-muted">
         <Icon className="size-5" aria-hidden="true" />
       </span>
       <p className="mt-4 text-sm font-semibold text-ink">{title}</p>

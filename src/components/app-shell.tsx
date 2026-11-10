@@ -15,7 +15,6 @@ import {
   LogOut,
   Menu,
   Settings,
-  ShieldCheck,
   UserRound,
   WalletCards,
   X,
@@ -167,16 +166,6 @@ function SidebarFooter({
     <div className="border-t border-line p-3">
       <div className="rounded-xl border border-line bg-white/[0.02] p-3">
         <div className="flex items-center gap-2">
-          <ShieldCheck className="size-3.5 text-accent" aria-hidden="true" />
-          <p className="text-[11px] font-semibold text-ink">Simulation only</p>
-        </div>
-        <p className="mt-1.5 text-[10px] leading-4 text-faint">
-          No custody, signing or transaction submission. Verification is fail-closed.
-        </p>
-      </div>
-
-      <div className="mt-3 rounded-xl border border-line bg-white/[0.02] p-3">
-        <div className="flex items-center gap-2">
           <span className="grid size-8 shrink-0 place-items-center rounded-full border border-accent/25 bg-accent/10 text-[10px] font-bold text-accent">
             {initials || <UserRound className="size-3.5" aria-hidden="true" />}
           </span>
@@ -199,7 +188,7 @@ function SidebarFooter({
           Role: <span className="font-semibold text-muted">{workspaceRole}</span>
         </p>
       </div>
-      <p className="px-1 pt-3 text-[10px] text-faint">Interlock · Phase 2 auth</p>
+      <p className="px-1 pt-3 text-[10px] text-faint">Interlock · verified memory gate</p>
     </div>
   );
 }
@@ -247,7 +236,7 @@ export function AppShell({
       </a>
 
       <div className="mx-auto flex min-h-dvh w-full max-w-[1700px]">
-        <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-line bg-[#080b0e]/80 backdrop-blur lg:flex">
+        <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-line bg-[#080b0e] lg:flex">
           <div className="border-b border-line p-4">
             <Link href="/dashboard" className="flex items-center gap-2.5 rounded-lg">
               <BrandMark />
@@ -285,7 +274,7 @@ export function AppShell({
             <button
               type="button"
               aria-label="Close navigation"
-              className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/70 "
               onClick={() => setOpen(false)}
             />
             <aside
@@ -325,7 +314,7 @@ export function AppShell({
         ) : null}
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-30 border-b border-line bg-[#06080a]/80 backdrop-blur">
+          <header className="sticky top-0 z-30 border-b border-line bg-[#06080a]">
             <div className="flex min-h-16 items-center gap-3 px-4 md:px-8">
               <button
                 type="button"
@@ -346,9 +335,6 @@ export function AppShell({
                 <span className="truncate text-muted">Verified workspace</span>
               </div>
               <div className="ml-auto flex items-center gap-2">
-                <Badge tone="warn" dot className="hidden sm:inline-flex">
-                  Simulation only
-                </Badge>
                 <Badge tone="accent" dot>
                   Preview
                 </Badge>
@@ -365,7 +351,10 @@ export function AppShell({
 
           <footer className="border-t border-line px-4 py-5 md:px-8">
             <div className="mx-auto flex w-full max-w-[1500px] flex-col gap-3 text-[11px] text-faint sm:flex-row sm:items-center sm:justify-between">
-              <p>Interlock · verified memory gate · simulation only</p>
+              <div>
+                <p>Interlock is a decision audit tool. Execution is simulated.</p>
+                <p className="mt-1 text-faint">No custody, signing, transfers or trades.</p>
+              </div>
               <div className="flex flex-wrap items-center gap-4">
                 <a
                   href="https://github.com/onyebuchidaniel60/interlock#readme"
