@@ -2,9 +2,13 @@ import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
 import { Database, KeyRound, MailPlus, ServerCog, ShieldCheck, UsersRound } from "lucide-react";
 
+import { createPolicyAction } from "@/app/(app)/actions";
 import { createInviteAction } from "@/app/auth-actions";
+import { SubmitButton } from "@/components/submit-button";
 import { Badge, PageHeader, PlaceholderPanel, StatusRow } from "@/components/ui";
 import { readRuntimeConfig } from "@/lib/config";
+import { formatBps, formatDate, shortId } from "@/lib/format";
+import { listActiveConstraints } from "@/lib/queries";
 import { listPendingInvitations, listWorkspaceMembers, requireWorkspace } from "@/lib/workspace";
 
 export const metadata: Metadata = { title: "Settings" };
@@ -14,25 +18,23 @@ const errorMessages: Record<string, string> = {
   forbidden: "Only the workspace owner can invite members.",
   invite_invalid: "Enter a valid email and role.",
   invite_create: "The invitation could not be created.",
+  FORBIDDEN: "Only the workspace owner can create policy.",
+  POLICY_INVALID: "Enter a valid address, basis-point limit and description.",
+  MEMORY_WRITE_FAILED: "The policy was stored, but Walrus verification failed. It is not active evidence.",
+  UNEXPECTED: "The policy could not be recorded.",
 };
-
-function formatDate(value: Date | string | null) {
-  if (!value) return "—";
-  return new Intl.DateTimeFormat("en", { dateStyle: "medium", timeStyle: "short", timeZone: "UTC" }).format(
-    new Date(value),
-  );
-}
 
 export default async function SettingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ invited?: string; error?: string }>;
+  searchParams: Promise<{ invited?: string; error?: string; policy?: string }>;
 }) {
   const params = await searchParams;
   const { user, workspace } = await requireWorkspace();
-  const [members, invitations] = await Promise.all([
+  const [members, invitations, constraints] = await Promise.all([
     listWorkspaceMembers(user.id, workspace.id),
     listPendingInvitations(user.id, workspace.id),
+    listActiveConstraints(user.id, workspace.id),
   ]);
 
   const cookieStore = await cookies();
@@ -184,6 +186,95 @@ export default async function SettingsPage({
               </ul>
             </div>
           ) : null}
+        </section>
+
+        <section className="surface p-5 lg:col-span-2">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="size-4 text-accent" aria-hidden="true" />
+              <h2 className="text-sm font-semibold text-ink">Exposure policy</h2>
+            </div>
+            <Badge tone={constraints.length ? "accent" : "warn"}>{constraints.length} active</Badge>
+          </div>
+          <p className="mt-2 max-w-3xl text-xs leading-5 text-muted">
+            A policy is an immutable Walrus CONSTRAINT, written by the policy delegate and verified before activation. Sentinel never treats a missing policy as permission.
+          </p>
+          {params.policy ? (
+            <p role="status" className="mt-3 rounded-lg border border-accent/25 bg-accent/10 p-3 text-xs text-accent">
+              Policy recorded and verified in Walrus.
+            </p>
+          ) : null}
+
+          <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+            <div>
+              {workspace.role === "OWNER" ? (
+                <form action={createPolicyAction} className="space-y-3">
+                  <label className="block">
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">Wallet scope</span>
+                    <input
+                      name="address"
+                      type="text"
+                      required
+                      pattern="0x[a-fA-F0-9]{64}"
+                      defaultValue={process.env.SUI_DEMO_ADDRESS ?? ""}
+                      className="mt-1.5 min-h-10 w-full rounded-lg border border-line bg-canvas px-3 font-mono text-xs text-ink outline-none"
+                    />
+                  </label>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <label className="block">
+                      <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">Max exposure (bps)</span>
+                      <input
+                        name="maxExposureBps"
+                        type="number"
+                        min={0}
+                        max={10000}
+                        required
+                        defaultValue={1000}
+                        className="mt-1.5 min-h-10 w-full rounded-lg border border-line bg-canvas px-3 font-mono text-sm text-ink outline-none"
+                      />
+                    </label>
+                    <label className="block">
+                      <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">Description</span>
+                      <input
+                        name="description"
+                        type="text"
+                        required
+                        maxLength={300}
+                        defaultValue="Maximum simulated exposure is 10% of the verified balance."
+                        className="mt-1.5 min-h-10 w-full rounded-lg border border-line bg-canvas px-3 text-sm text-ink outline-none"
+                      />
+                    </label>
+                  </div>
+                  <SubmitButton pendingLabel="Writing CONSTRAINT to Walrus…">Record verified policy</SubmitButton>
+                </form>
+              ) : (
+                <p className="rounded-lg border border-line bg-white/[0.02] p-3 text-xs leading-5 text-muted">
+                  Only the workspace owner can create or change policy. Operators can run observations and plans against existing policy.
+                </p>
+              )}
+            </div>
+
+            <div className="rounded-xl border border-line bg-white/[0.02] p-4">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-faint">Active constraints</p>
+              {constraints.length === 0 ? (
+                <p className="mt-2 text-xs leading-5 text-warn">No active policy. Sentinel will HOLD every evaluation.</p>
+              ) : (
+                <ul className="mt-2 space-y-3">
+                  {constraints.map((constraint) => {
+                    const bps = typeof constraint.payload_index?.maxExposureBps === "number" ? constraint.payload_index.maxExposureBps : null;
+                    return (
+                      <li key={constraint.id} className="border-b border-line pb-2 last:border-b-0 last:pb-0">
+                        <p className="text-xs font-semibold text-ink">MAX_EXPOSURE_BPS · {bps === null ? "unknown" : formatBps(bps)}</p>
+                        <p className="mt-1 font-mono text-[10px] text-faint">{constraint.scope}</p>
+                        <p className="mt-1 font-mono text-[10px] text-muted">{shortId(constraint.walrus_blob_id, 20)}</p>
+                        <p className="mt-1 text-[10px] text-faint">verified {formatDate(constraint.verified_at)}</p>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+          </div>
         </section>
 
         <section className="surface p-5">

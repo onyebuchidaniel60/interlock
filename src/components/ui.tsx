@@ -180,8 +180,8 @@ export function AgentCard({
         <span className="grid size-9 place-items-center rounded-lg border border-line-strong bg-white/[0.03] text-muted">
           <Icon className="size-4" aria-hidden="true" />
         </span>
-        <Badge tone="neutral" dot>
-          Not wired
+        <Badge tone="accent" dot>
+          Wired
         </Badge>
       </div>
       <p className="mt-4 text-sm font-semibold text-ink">{name}</p>

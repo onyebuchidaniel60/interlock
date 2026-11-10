@@ -20,27 +20,34 @@ import {
   SectionHeading,
   StatusRow,
 } from "@/components/ui";
+import { formatDate, formatMist, shortId } from "@/lib/format";
+import { getWorkspaceOverview } from "@/lib/queries";
+import { requireWorkspace } from "@/lib/workspace";
 
 export const metadata: Metadata = { title: "Dashboard" };
+export const dynamic = "force-dynamic";
 
 const agents = [
-  { name: "Scout", role: "Observation", status: "Awaiting Phase 3" },
-  { name: "Analyst", role: "Explanation only", status: "Awaiting Phase 3" },
-  { name: "Sentinel", role: "Deterministic gate", status: "Awaiting Phase 3" },
-  { name: "Runner", role: "Simulation only", status: "Awaiting Phase 5" },
+  { name: "Scout", role: "Observation", status: "Live" },
+  { name: "Analyst", role: "Explanation only", status: "Fallback ready" },
+  { name: "Sentinel", role: "Deterministic gate", status: "Live" },
+  { name: "Runner", role: "Simulation only", status: "Live" },
 ];
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const { user, workspace } = await requireWorkspace();
+  const { counts, recent } = await getWorkspaceOverview(user.id, workspace.id);
+
   return (
     <div className="space-y-6">
       <PageHeader
         eyebrow="Monitor"
         title="Operations console"
-        description="A navigable preview of the verified-memory execution gate. Provider adapters, authentication and decision flows are labelled as unfinished until their phases land."
+        description="The verified-memory execution gate. Scout records Tatum observations, Sentinel verifies Walrus evidence deterministically, and Runner consumes a single-use simulation clearance only after final approval."
         actions={
           <>
-            <Badge tone="warn" dot>
-              Preview shell
+            <Badge tone="accent" dot>
+              Live workspace
             </Badge>
             <ButtonLink href="/observations" variant="secondary">
               Inspect observations
@@ -53,17 +60,23 @@ export default function DashboardPage() {
       <section aria-label="Key metrics" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
           label="Verified memories"
-          value="0"
-          detail="No Walrus-backed records yet"
+          value={String(counts?.memories ?? 0)}
+          detail="Active Walrus-backed records"
           icon={Brain}
+          tone="accent"
         />
         <KpiCard
           label="Active policies"
-          value="0"
-          detail="Policy authoring arrives in Phase 4"
+          value={String(counts?.policies ?? 0)}
+          detail="Verified CONSTRAINT records"
           icon={ShieldCheck}
         />
-        <KpiCard label="Decisions" value="0" detail="Sentinel is not wired yet" icon={Activity} />
+        <KpiCard
+          label="Decisions"
+          value={String(counts?.decisions ?? 0)}
+          detail={`${counts?.holds ?? 0} HOLD · ${counts?.executions ?? 0} simulated`}
+          icon={Activity}
+        />
         <KpiCard
           label="Execution mode"
           value="Simulation"
@@ -77,21 +90,47 @@ export default function DashboardPage() {
         <section className="surface p-5">
           <SectionHeading
             title="Decision activity"
-            description="Every verdict will cite the exact Walrus record and chain observation it used."
-            action={<Badge tone="neutral">No decisions</Badge>}
+            description="Every verdict cites the exact Walrus record and chain observation it used."
+            action={<Badge tone="neutral">{recent.length} recent</Badge>}
           />
           <div className="mt-5">
-            <EmptyState
-              icon={ShieldAlert}
-              title="No decision records yet"
-              description="The deterministic Sentinel, its evidence panel and the signed Runner clearance are implemented in later phases. This shell does not display fabricated verdicts."
-              action={
-                <ButtonLink href="/memory" variant="secondary">
-                  Open memory ledger
-                  <ArrowRight className="size-3.5" aria-hidden="true" />
-                </ButtonLink>
-              }
-            />
+            {recent.length === 0 ? (
+              <EmptyState
+                icon={ShieldAlert}
+                title="No decision records yet"
+                description="Create a plan from a fresh observation and run Sentinel. Missing policy, unverified memory or a failed VERDICT write results in HOLD."
+                action={
+                  <ButtonLink href="/plans/new" variant="secondary">
+                    Create a plan
+                    <ArrowRight className="size-3.5" aria-hidden="true" />
+                  </ButtonLink>
+                }
+              />
+            ) : (
+              <div className="divide-y divide-line">
+                {recent.map((decision) => (
+                  <a
+                    key={decision.id}
+                    href={`/decisions/${decision.id}`}
+                    className="flex flex-wrap items-center gap-3 py-3 first:pt-0 last:pb-0"
+                  >
+                    <Badge
+                      tone={decision.verdict === "APPROVE" ? "accent" : decision.verdict === "REJECT" ? "danger" : "warn"}
+                      dot
+                    >
+                      {decision.verdict}
+                    </Badge>
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-ink">{decision.reason_code}</p>
+                      <p className="mt-0.5 font-mono text-[10px] text-faint">
+                        {shortId(decision.id, 14)} · {formatMist(decision.amount_mist)} · {formatDate(decision.created_at)}
+                      </p>
+                    </div>
+                    <ArrowRight className="ml-auto size-3.5 text-muted" aria-hidden="true" />
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
@@ -181,21 +220,21 @@ export default function DashboardPage() {
             />
             <StatusRow
               label="Walrus Memory mainnet"
-              value="Adapter pending"
+              value="Live"
               tone="accent"
-              detail="Phase 0 signed write/read smoke test passed; the application adapter is Phase 3."
+              detail="Signed writes, metadata listing and verified recall are wired."
             />
             <StatusRow
               label="Tatum Sui gRPC"
-              value="Adapter pending"
+              value="Live"
               tone="accent"
-              detail="Phase 0 StateService.GetBalance method verified; the funded demo observation is re-checked in Phase 3."
+              detail="Non-zero funded demo observation verified in Phase 3."
             />
             <StatusRow
               label="Groq Analyst"
-              value="Phase 3"
+              value="Fallback ready"
               tone="neutral"
-              detail="No model call is made by the preview shell. Analyst can never authorize an action."
+              detail="Analyst text only; deterministic fallback; no policy authority."
             />
           </div>
         </section>

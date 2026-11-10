@@ -25,11 +25,38 @@ test.describe("authenticated workspace", () => {
     await expect(page.getByRole("heading", { level: 1, name: "Workspace settings" })).toBeVisible({ timeout: 20_000 });
     await expect(page.getByRole("heading", { name: "Members" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Create one-time invite link" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Record verified policy" })).toBeVisible();
     await expect(page.getByText("Enforced")).toBeVisible();
   });
 
+  test("observations, memory and plans expose verified live data", async ({ page }) => {
+    await page.goto("/observations", { waitUntil: "domcontentloaded", timeout: 45_000 });
+    await expect(page.getByRole("heading", { level: 1, name: "Chain observations" })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole("button", { name: "Run Scout" })).toBeVisible();
+    await expect(page.getByText("Observation history")).toBeVisible();
+
+    await page.goto("/memory", { waitUntil: "domcontentloaded", timeout: 45_000 });
+    await expect(page.getByRole("heading", { level: 1, name: "Memory ledger" })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText("Walrus blob")).toBeVisible();
+
+    await page.goto("/plans", { waitUntil: "domcontentloaded", timeout: 45_000 });
+    await expect(page.getByRole("heading", { level: 1, name: "Action plans" })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole("link", { name: /Open/ }).first()).toBeVisible();
+  });
+
+  test("decision detail exposes verified citations and simulation state", async ({ page }) => {
+    await page.goto("/plans", { waitUntil: "domcontentloaded", timeout: 45_000 });
+    const open = page.getByRole("link", { name: /Open/ }).first();
+    await open.click();
+    await expect(page.getByRole("heading", { level: 1, name: "Plan detail" })).toBeVisible({ timeout: 20_000 });
+    await page.getByRole("link", { name: /APPROVE|REJECT|HOLD/ }).first().click();
+    await expect(page.getByRole("heading", { level: 1, name: "Decision detail" })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole("heading", { name: "Cited evidence" })).toBeVisible();
+    await expect(page.getByText(/Simulated once|Simulate once/)).toBeVisible();
+  });
+
   test("primary navigation works with a real session", async ({ page }) => {
-    await page.getByRole("link", { name: "Open memory ledger" }).click();
+    await page.getByRole("navigation", { name: "Primary navigation" }).first().getByRole("link", { name: "Memory ledger" }).click();
     await expect(page).toHaveURL(/\/memory$/);
     await expect(page.getByRole("heading", { level: 1, name: "Memory ledger" })).toBeVisible();
   });

@@ -365,7 +365,7 @@ export function AppShell({
 
           <footer className="border-t border-line px-4 py-5 md:px-8">
             <div className="mx-auto flex w-full max-w-[1500px] flex-col gap-3 text-[11px] text-faint sm:flex-row sm:items-center sm:justify-between">
-              <p>Interlock preview shell · Phase 2 · simulation only</p>
+              <p>Interlock preview shell · Phase 4 · simulation only</p>
               <div className="flex flex-wrap items-center gap-4">
                 <a
                   href="https://github.com/onyebuchidaniel60/interlock#readme"

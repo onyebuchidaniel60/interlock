@@ -1,127 +1,206 @@
 import type { Metadata } from "next";
-import { ArrowLeft, Brain, FileSearch, ScrollText, ShieldCheck } from "lucide-react";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { ArrowLeft, CheckCircle2, FileSearch, ShieldAlert, ShieldCheck, WalletCards } from "lucide-react";
 
-import {
-  Badge,
-  ButtonLink,
-  EmptyState,
-  PageHeader,
-  PlaceholderPanel,
-  StatusRow,
-} from "@/components/ui";
+import { simulateDecisionAction } from "@/app/(app)/actions";
+import { SubmitButton } from "@/components/submit-button";
+import { Badge, ButtonLink, PageHeader, StatusRow } from "@/components/ui";
+import { formatBps, formatDate, formatMist, shortId } from "@/lib/format";
+import { getDecisionDetail } from "@/lib/queries";
+import { requireWorkspace } from "@/lib/workspace";
 
 export const metadata: Metadata = { title: "Decision detail" };
+export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
-export default async function DecisionDetailPage({ params }: { params: Promise<{ id: string }> }) {
+const errors: Record<string, string> = {
+  NOT_APPROVED: "Only a final approved decision can be simulated.",
+  VERDICT_MEMORY_MISSING: "The approval has no verified VERDICT memory.",
+  VERDICT_MEMORY_UNVERIFIED: "The approval VERDICT memory could not be recalled.",
+  ALREADY_SIMULATED: "This decision has already been simulated once.",
+  UNEXPECTED: "The simulation could not be completed.",
+};
+
+const verdictTone = { APPROVE: "accent", REJECT: "danger", HOLD: "warn" } as const;
+
+export default async function DecisionDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ simulated?: string; error?: string }>;
+}) {
   const { id } = await params;
+  const query = await searchParams;
+  const { user, workspace } = await requireWorkspace();
+  const detail = await getDecisionDetail(user.id, workspace.id, id);
+  if (!detail) notFound();
+  const { decision, evidence } = detail;
+  const error = query.error ? errors[query.error] ?? errors.UNEXPECTED : null;
+  const canSimulate = decision.status === "FINAL_APPROVED" && !decision.execution_id;
 
   return (
     <div className="space-y-6">
       <PageHeader
         eyebrow="Decisions / Evidence"
         title="Decision detail"
-        description="The evidence-first verdict view. This route does not invent a decision when no persisted, verified record exists."
+        description="The evidence-first verdict view. Every cited record is a Walrus memory that was recalled and hash-verified before the deterministic evaluation."
         actions={
           <>
-            <Badge tone="neutral" dot>
-              Not evaluated
+            <Badge tone={verdictTone[decision.verdict as keyof typeof verdictTone] ?? "neutral"} dot>
+              {decision.verdict}
             </Badge>
-            <ButtonLink href="/dashboard" variant="secondary">
+            <ButtonLink href={`/plans/${decision.plan_id}`} variant="secondary">
               <ArrowLeft className="size-3.5" aria-hidden="true" />
-              Back to dashboard
+              Back to plan
             </ButtonLink>
           </>
         }
       />
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
+      {query.simulated ? (
+        <p role="status" className="rounded-lg border border-accent/25 bg-accent/10 p-3 text-xs text-accent">
+          Simulated once. The execution record is immutable; another attempt is blocked by the one-execution constraint.
+        </p>
+      ) : null}
+      {error ? (
+        <p role="alert" className="rounded-lg border border-danger/25 bg-danger/10 p-3 text-xs text-danger">
+          {error}
+        </p>
+      ) : null}
+
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <section className="surface p-5">
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-start justify-between gap-4 border-b border-line pb-4">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-faint">
-                Decision route
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-faint">Verdict</p>
+              <p className={`mt-1 text-3xl font-semibold ${decision.verdict === "APPROVE" ? "text-accent" : decision.verdict === "REJECT" ? "text-danger" : "text-warn"}`}>
+                {decision.verdict}
               </p>
-              <p className="mt-1 break-all font-mono text-sm text-ink">{id}</p>
+              <p className="mt-2 max-w-xl text-sm leading-6 text-muted">{decision.explanation}</p>
             </div>
-            <Badge tone="warn">HOLD is the default</Badge>
+            <Badge tone="neutral">{decision.reason_code}</Badge>
           </div>
 
-          <div className="mt-6">
-            <EmptyState
-              icon={FileSearch}
-              title="No evidence to display"
-              description="A decision requires a persisted plan, a complete candidate set, verified Walrus recall and a deterministic Sentinel evaluation. None of those exist in the Phase 1 shell."
-            />
+          <div className="mt-4 grid gap-4 sm:grid-cols-3">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-faint">Amount</p>
+              <p className="mt-1 text-sm font-semibold text-ink">{formatMist(decision.amount_mist)}</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-faint">Exposure</p>
+              <p className="mt-1 text-sm font-semibold text-ink">{formatBps(decision.exposure_bps)}</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-faint">Wallet</p>
+              <p className="mt-1 font-mono text-xs text-ink">{shortId(decision.address, 18)}</p>
+            </div>
           </div>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            {[
-              { step: "Scout", detail: "Observation + FACT" },
-              { step: "Sentinel", detail: "Recall + deterministic rules" },
-              { step: "Runner", detail: "Signed simulation only" },
-            ].map((item, index) => (
-              <div key={item.step} className="rounded-xl border border-line bg-white/[0.02] p-3.5">
-                <p className="font-mono text-[10px] text-faint">0{index + 1}</p>
-                <p className="mt-1.5 text-xs font-semibold text-ink">{item.step}</p>
-                <p className="mt-1 text-[11px] leading-5 text-faint">{item.detail}</p>
-                <Badge tone="neutral" className="mt-2">
-                  Pending
-                </Badge>
+          <div className="mt-4">
+            <StatusRow label="Decision state" value={decision.status} tone={decision.status === "FINAL_APPROVED" ? "accent" : decision.status === "FINAL_REJECTED" ? "danger" : "warn"} />
+            <StatusRow label="Plan hash" value={shortId(decision.plan_hash, 18)} tone="neutral" />
+            <StatusRow label="Evaluation hash" value={shortId(decision.evaluation_hash, 18)} tone="neutral" />
+            <StatusRow label="VERDICT memory" value={decision.verdict_memory_id ? shortId(decision.verdict_memory_id, 18) : "Missing"} tone={decision.verdict_memory_id ? "accent" : "danger"} />
+            <StatusRow label="Finalized" value={formatDate(decision.finalized_at)} tone="neutral" />
+          </div>
+
+          <div className="mt-5">
+            <div className="flex items-center gap-2">
+              <FileSearch className="size-4 text-accent" aria-hidden="true" />
+              <h2 className="text-sm font-semibold text-ink">Cited evidence</h2>
+              <Badge tone="neutral" className="ml-auto">
+                {evidence.length} records
+              </Badge>
+            </div>
+            {evidence.length === 0 ? (
+              <p className="mt-3 rounded-lg border border-warn/25 bg-warn/5 p-3 text-xs text-warn">
+                No evidence rows were stored. The decision is fail-closed.
+              </p>
+            ) : (
+              <div className="mt-3 overflow-x-auto">
+                <table className="w-full min-w-[760px] text-left text-xs">
+                  <thead className="border-b border-line text-[10px] uppercase tracking-[0.14em] text-faint">
+                    <tr>
+                      <th className="pb-2 font-semibold">Role</th>
+                      <th className="pb-2 font-semibold">Verification</th>
+                      <th className="pb-2 font-semibold">Author</th>
+                      <th className="pb-2 font-semibold">Blob</th>
+                      <th className="pb-2 font-semibold">Hash</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-line">
+                    {evidence.map((row) => (
+                      <tr key={row.memory_entry_id}>
+                        <td className="py-3 pr-4">
+                          <Badge tone={row.evidence_role === "CONSTRAINT" ? "warn" : "neutral"}>{row.evidence_role}</Badge>
+                          <p className="mt-1 font-mono text-[10px] text-faint">{shortId(row.memory_entry_id, 14)}</p>
+                        </td>
+                        <td className="py-3 pr-4">
+                          <Badge tone={row.verification_status === "VERIFIED" ? "accent" : "danger"} dot>
+                            {row.verification_status}
+                          </Badge>
+                        </td>
+                        <td className="py-3 pr-4 text-muted">{row.author_type ?? "—"}</td>
+                        <td className="py-3 pr-4 font-mono text-[10px] text-muted">{shortId(row.blob_id, 18)}</td>
+                        <td className="py-3 font-mono text-[10px] text-faint">{shortId(row.content_hash, 16)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            ))}
+            )}
           </div>
         </section>
 
         <aside className="space-y-4">
           <section className="surface p-5">
             <div className="flex items-center gap-2">
+              <WalletCards className="size-4 text-accent" aria-hidden="true" />
+              <h2 className="text-sm font-semibold text-ink">Runner simulation</h2>
+            </div>
+            {decision.execution_id ? (
+              <div className="mt-3 rounded-xl border border-accent/25 bg-accent/5 p-4">
+                <div className="flex items-center gap-2 text-accent">
+                  <CheckCircle2 className="size-4" aria-hidden="true" />
+                  <p className="text-xs font-semibold">Simulated once</p>
+                </div>
+                <p className="mt-2 font-mono text-[10px] text-muted">Execution {shortId(decision.execution_id, 18)}</p>
+                <p className="mt-1 text-xs text-muted">{formatDate(decision.execution_at)}</p>
+              </div>
+            ) : canSimulate ? (
+              <form action={simulateDecisionAction} className="mt-3">
+                <input type="hidden" name="decisionId" value={decision.id} />
+                <SubmitButton pendingLabel="Consuming clearance…">Simulate once</SubmitButton>
+                <p className="mt-2 text-[10px] leading-5 text-faint">
+                  The server verifies the VERDICT memory again, mints a 60-second single-use clearance and atomically consumes it. No transaction is submitted.
+                </p>
+              </form>
+            ) : (
+              <div className="mt-3 flex items-start gap-2 rounded-lg border border-warn/25 bg-warn/5 p-3 text-xs leading-5 text-warn">
+                <ShieldAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                Runner remains blocked until this decision reaches FINAL_APPROVED with a verified VERDICT memory.
+              </div>
+            )}
+          </section>
+
+          <section className="surface p-5">
+            <div className="flex items-center gap-2">
               <ShieldCheck className="size-4 text-accent" aria-hidden="true" />
-              <h2 className="text-sm font-semibold text-ink">Verdict panel</h2>
+              <h2 className="text-sm font-semibold text-ink">Safety boundary</h2>
             </div>
-            <div className="mt-3">
-              <StatusRow label="Verdict" value="Not evaluated" tone="neutral" />
-              <StatusRow
-                label="Rule"
-                value="No policy"
-                tone="neutral"
-                detail="Missing policy always means HOLD, never implicit approval."
-              />
-              <StatusRow label="Evidence" value="0 records" tone="neutral" />
-              <StatusRow label="Plan hash" value="Absent" tone="neutral" />
-            </div>
-          </section>
-
-          <section className="surface p-5">
-            <div className="flex items-center gap-2">
-              <Brain className="size-4 text-accent" aria-hidden="true" />
-              <h2 className="text-sm font-semibold text-ink">Memory citations</h2>
-            </div>
-            <p className="mt-2 text-xs leading-5 text-muted">
-              Cited FACT, CONSTRAINT and VERDICT records will show author, namespace, blob ID,
-              content hash and recall verification here.
-            </p>
-            <ButtonLink href="/memory" variant="ghost" external={false}>
-              Inspect memory ledger
-            </ButtonLink>
-          </section>
-
-          <section className="surface p-5">
-            <div className="flex items-center gap-2">
-              <ScrollText className="size-4 text-muted" aria-hidden="true" />
-              <h2 className="text-sm font-semibold text-ink">Audit</h2>
-            </div>
-            <p className="mt-2 text-xs leading-5 text-muted">
-              Audit events are append-only. No mutation occurred for this placeholder route.
-            </p>
+            <ul className="mt-3 space-y-2 text-xs leading-5 text-muted">
+              <li>Simulation only. No custody, signing, transfers or trades.</li>
+              <li>One execution per decision; the unique constraint blocks replay.</li>
+              <li>Missing policy or unverified memory is HOLD, never APPROVE.</li>
+            </ul>
+            <Link href="/audit" className="mt-4 inline-flex text-[11px] font-semibold text-accent hover:underline">
+              View audit trail
+            </Link>
           </section>
         </aside>
       </div>
-
-      <PlaceholderPanel
-        phase="Phase 5"
-        title="Runner is not connected"
-        description="Only a final APPROVE with a completed, verified and recalled VERDICT memory can mint a short-lived, single-use simulation clearance. No Runner action exists in this shell."
-      />
     </div>
   );
 }

@@ -14,7 +14,7 @@ export default function AgentsPage() {
         description="Four logical capabilities inside one application. None is a separate microservice, and none can bypass the deterministic Sentinel or the simulation-only Runner."
         actions={
           <Badge tone="neutral" dot>
-            Not wired
+            Live modules
           </Badge>
         }
       />
@@ -49,7 +49,7 @@ export default function AgentsPage() {
       <section className="surface p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-sm font-semibold text-ink">Decision path</h2>
-          <Badge tone="info">Phase 1 structure</Badge>
+          <Badge tone="accent">Live pipeline</Badge>
         </div>
         <div className="mt-5 grid gap-3 md:grid-cols-4">
           {[
@@ -75,8 +75,8 @@ export default function AgentsPage() {
       </section>
 
       <PlaceholderPanel
-        phase="Phase 3–5"
-        title="Agent runtime is not active"
+        phase="Live"
+        title="Agent runtime is active"
         description="Each module gets a server-side capability and a scoped Walrus delegate identity where available. The application must not expose a privileged agent route to the browser."
       />
     </div>
