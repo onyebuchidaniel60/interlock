@@ -4,7 +4,8 @@ Interlock is a decision audit tool that lets one agent's verified Walrus Memory 
 
 ## Quick Start — Try It Now
 
-**Live production:** <https://interlock-recall.vercel.app>  
+**Live production:** <https://interlock-recall.vercel.app>
+
 **Access:** public. Create an account at `/setup`, then create a workspace; no demo credentials are published. Use `interlock-recall.vercel.app` for submission — **do not use `interlock.vercel.app`**, which belongs to an unrelated app.
 
 The preview-only `/demo` comparison returns **404** in production. The video and protected preview retain the comparison harness.
