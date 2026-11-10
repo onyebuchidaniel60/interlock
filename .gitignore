@@ -41,3 +41,6 @@ yarn-debug.log*
 
 .agents/
 skills-lock.json
+
+demo/raw/
+demo/narration.wav

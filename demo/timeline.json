@@ -1,0 +1,66 @@
+{
+  "titleDuration": 2.5,
+  "gap": 0.8,
+  "scenes": [
+    {
+      "id": "intro",
+      "text": "Interlock is a verified memory gate for multi-agent systems. Scout observes. Sentinel verifies. Runner simulates only when the evidence supports it.",
+      "audioDuration": 10.28,
+      "duration": 11.08
+    },
+    {
+      "id": "observations",
+      "text": "Scout reads a public Sui balance through Tatum, stores the exact observation, and writes a signed fact to Walrus Memory. It verifies the recalled content before activating anything.",
+      "audioDuration": 12.14,
+      "duration": 12.94
+    },
+    {
+      "id": "memory",
+      "text": "The memory ledger is an index, not the memory itself. Each record shows its author, scope, hash and Walrus blob. Pending or mismatched records are never active evidence.",
+      "audioDuration": 11.67,
+      "duration": 12.47
+    },
+    {
+      "id": "policy",
+      "text": "An owner records a policy as an immutable Walrus constraint. Missing policy always means hold, never implicit approval.",
+      "audioDuration": 8.3,
+      "duration": 9.1
+    },
+    {
+      "id": "plan",
+      "text": "An operator creates one immutable plan with an amount and exposure in basis points. The plan hash binds every later decision and clearance.",
+      "audioDuration": 9.3,
+      "duration": 10.1
+    },
+    {
+      "id": "sentinel",
+      "text": "Sentinel enumerates the applicable records, recalls each blob, verifies namespace, author and hash, and applies fixed integer rules. No language model decides.",
+      "audioDuration": 11.09,
+      "duration": 11.89
+    },
+    {
+      "id": "decision",
+      "text": "Here, a fifteen percent plan is rejected by a verified ten percent policy. The decision cites the exact fact and constraint, and the verdict is written back to Walrus.",
+      "audioDuration": 10.77,
+      "duration": 11.57
+    },
+    {
+      "id": "demo",
+      "text": "The demo harness runs the same plan twice. The unguarded baseline would pass. The protected path rejects with real citations. Same input, different outcome.",
+      "audioDuration": 10.97,
+      "duration": 11.77
+    },
+    {
+      "id": "runner",
+      "text": "Runner accepts only a final approval with a verified verdict memory. It mints a sixty second, single use clearance and records one simulation. No funds move.",
+      "audioDuration": 10.97,
+      "duration": 11.77
+    },
+    {
+      "id": "close",
+      "text": "Interlock. Verified memory. Enforced decisions.",
+      "audioDuration": 3.37,
+      "duration": 4.17
+    }
+  ]
+}

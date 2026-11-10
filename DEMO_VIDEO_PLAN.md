@@ -67,3 +67,13 @@ If video file is too large for repository policy, store it in the operator-appro
 ## Current status
 
 Not produced. No app, preview, test fixture, voice availability or approved output path has yet been validated. Production occurs only in Phase 8.
+
+## Production status (Phase 8)
+
+- **Produced:** `demo/interlock-demo.mp4`.
+- **Duration:** 109.36 seconds (<=180; target 90–150).
+- **Video:** 1280×800 H.264; **audio:** AAC.
+- **TTS:** Kokoro ONNX 0.6.1, voice `af_bella`, local; Piper not needed.
+- **Captions:** burned in from `demo/captions.srt`.
+- **Review:** playback verified with `ffprobe`; audio present; synthetic workspace/email only; wallet addresses truncated; no secrets.
+- **Production details:** `demo/production-notes.md`; narration script `demo/narration.md`; raw capture ignored under `demo/raw/`.

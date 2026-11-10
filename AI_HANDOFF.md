@@ -3,10 +3,10 @@
 ## Current status
 
 - Product: **Interlock** — one agent's verified memory can prevent another agent from executing a policy-violating action.
-- Implementation phase: **Phase 7 complete — operator/product documentation and frontend completeness.**
+- Implementation phase: **Phase 8 complete — reviewed 109.36-second demo video produced.**
 - Application: authenticated operations console with live Tatum, Walrus, Sentinel and Runner flows.
 - Repository: `https://github.com/onyebuchidaniel60/interlock`, branch `main`.
-- Phase 4: **`5c03b94`**; Phase 5: **`d141f0c`**; Phase 6: **`a8aa450`**; Phase 7 docs commit follows.
+- Phase 4: **`5c03b94`**; Phase 5: **`d141f0c`**; Phase 6: **`a8aa450`**; Phase 7: **`a609b8c`**; Phase 8 docs commit follows.
 - Preview URL: **https://interlock-w9g75cpnj-uhhh2.vercel.app**
 - Deployed source commit: **`a8aa450`**; target: preview.
 - Protection: **Vercel Authentication**; public requests `302` to Vercel SSO; automation bypass empty.
@@ -19,6 +19,15 @@
 - Groq Analyst: adapter with deterministic fallback; no policy authority; not required for safety.
 - Production: not deployed; bounded Phase 9 release only.
 - Budget: **$0 unapproved spend; free tiers only.**
+
+## Phase 8 delivered
+
+- `demo/interlock-demo.mp4`: 109.36s, 1280×800 H.264/AAC, burned captions.
+- Kokoro ONNX 0.6.1 local TTS, voice `af_bella`; Piper fallback not needed.
+- Real preview workspace/data captured with Playwright; no fabricated provider evidence.
+- Redactions: synthetic workspace/email, truncated wallets, no secrets.
+- Playback verified with ffprobe (video/audio duration match, audio levels present).
+- Production notes, narration and reproducible scripts are in `demo/`.
 
 ## Phase 7 delivered
 
@@ -81,16 +90,16 @@
 6. Production startup fails if the demo baseline is enabled or execution mode is not simulation.
 7. Runner clearance is HMAC-signed, 60 seconds max, plan/workspace/decision-bound and one-time via unique constraints.
 
-## Next task — Phase 8
+## Next task — Phase 9
 
-Produce the reviewed demo video per `DEMO_VIDEO_PLAN.md`:
+Run the final regression, security and release-readiness gate:
 
-1. Use deterministic existing demo data or run the live comparison once; capture real UI with Playwright video.
-2. Generate narration with Kokoro TTS (Apache-2.0, local); fall back to Piper only if Kokoro cannot run. Record engine/voice in `demo/production-notes.md`.
-3. Keep <=180 seconds (target 90–150), synchronize narration to visible behavior, add captions where feasible.
-4. Redact secrets, tokens, private URLs, personal email and private account IDs; truncate wallet addresses if needed.
-5. Verify video/audio playback and exact duration.
-6. Save outputs to `demo/`, update DEMO_VIDEO_PLAN/AI_HANDOFF/BUILD_LOG, commit `docs: add reviewed interlock demo production artifacts`, continue to Phase 9.
+1. Re-run typecheck, lint, unit, integration, public shell, authenticated, responsive and live comparison tests.
+2. Run dependency/security audit and staged-content secret scan; verify security headers and RLS role.
+3. Verify preview protection and latest preview commit.
+4. Attempt the bounded production release only if a separate production Neon project/branch, production secrets and a verified backup/rollback path exist. If they do not, stop and report the exact missing inputs; never reuse preview secrets or the preview database for production.
+5. Update AI_HANDOFF/BUILD_LOG and commit `chore: final regression and release readiness`.
+6. Report final status, preview URL/commit, tests, known limitations and production blocker if any.
 
 ## Known issues / limitations
 

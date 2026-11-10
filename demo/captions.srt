@@ -1,0 +1,82 @@
+1
+00:00:02,500 --> 00:00:07,990
+Interlock is a verified memory gate for multi-agent systems.
+
+2
+00:00:08,040 --> 00:00:13,530
+Scout observes. Sentinel verifies. Runner simulates only when the evidence
+supports it.
+
+3
+00:00:13,580 --> 00:00:20,000
+Scout reads a public Sui balance through Tatum, stores the exact observation,
+
+4
+00:00:20,050 --> 00:00:26,470
+and writes a signed fact to Walrus Memory. It verifies the recalled content
+before activating anything.
+
+5
+00:00:26,520 --> 00:00:32,705
+The memory ledger is an index, not the memory itself. Each record shows its
+author,
+
+6
+00:00:32,755 --> 00:00:38,940
+scope, hash and Walrus blob. Pending or mismatched records are never active
+evidence.
+
+7
+00:00:38,990 --> 00:00:43,490
+An owner records a policy as an immutable Walrus
+
+8
+00:00:43,540 --> 00:00:48,040
+constraint. Missing policy always means hold, never implicit approval.
+
+9
+00:00:48,090 --> 00:00:53,090
+An operator creates one immutable plan with an amount and exposure
+
+10
+00:00:53,140 --> 00:00:58,140
+in basis points. The plan hash binds every later decision and clearance.
+
+11
+00:00:58,190 --> 00:01:04,085
+Sentinel enumerates the applicable records, recalls each blob,
+
+12
+00:01:04,135 --> 00:01:10,030
+verifies namespace, author and hash, and applies fixed integer rules. No
+language model decides.
+
+13
+00:01:10,080 --> 00:01:15,815
+Here, a fifteen percent plan is rejected by a verified ten percent policy.
+
+14
+00:01:15,865 --> 00:01:21,600
+The decision cites the exact fact and constraint, and the verdict is written
+back to Walrus.
+
+15
+00:01:21,650 --> 00:01:27,485
+The demo harness runs the same plan twice. The unguarded baseline would pass.
+
+16
+00:01:27,535 --> 00:01:33,370
+The protected path rejects with real citations. Same input, different outcome.
+
+17
+00:01:33,420 --> 00:01:39,255
+Runner accepts only a final approval with a verified verdict memory.
+
+18
+00:01:39,305 --> 00:01:45,140
+It mints a sixty second, single use clearance and records one simulation. No
+funds move.
+
+19
+00:01:45,240 --> 00:01:49,310
+Interlock. Verified memory. Enforced decisions.

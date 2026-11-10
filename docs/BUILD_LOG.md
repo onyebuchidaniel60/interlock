@@ -407,3 +407,23 @@ Known issues: demo video pending; production gated.
 Next task: Phase 8 — reviewed demo video.
 Authorization: preview only; production gated to Phase 9.
 ```
+
+## Phase 8 — reviewed demo video
+
+```text
+Date/time: 2026-11-10T09:42Z
+Phase: Phase 8 — demo video production
+Output: demo/interlock-demo.mp4
+Duration: 109.36s (<=180)
+Video/audio: 1280×800 H.264 + AAC, burned captions
+TTS: Kokoro ONNX 0.6.1, local, voice af_bella; Piper not needed
+Evidence:
+  - Real preview workspace/data captured with Playwright.
+  - Narrated timeline generated with Kokoro; video scene durations derived from audio.
+  - ffprobe confirms 109.36s video and audio; mean -21.4 dB, max -2.0 dB.
+  - Synthetic workspace/email only; wallet addresses truncated; no secrets.
+  - SHA-256: 87de5f61641eb5b4d882342311f4be76544622bb6c09fcc527e253b23f2904ef
+Artifacts: demo/interlock-demo.mp4, demo/narration.md, demo/captions.srt, demo/production-notes.md, demo/timeline.json
+Raw capture ignored under demo/raw/; narration.wav ignored.
+Next task: Phase 9 — final regression/security/release readiness.
+```
