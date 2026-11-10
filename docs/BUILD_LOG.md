@@ -497,3 +497,26 @@ Production: not deployed; no migration; preview secrets not reused.
 - Public access: `302` to Vercel SSO; Vercel Authentication enabled; `protectionBypass` empty.
 - Production: blocked. `https://interlock.vercel.app` is an unrelated Vercel app; no production Vercel env or separate production Neon/Walrus/backup inputs exist.
 - Finalization tests: 14 unit, 7 integration, 10 public shell, 6 authenticated, 6 responsive, session tests, live comparison desktop PASS; `npm audit` 0; secret scan clean.
+
+## Production deployment — interlock-recall
+
+```text
+Date/time: 2026-11-10T17:35Z
+Project rename: interlock -> interlock-recall
+Production URL: https://interlock-recall.vercel.app
+Production deployment: dpl_CQZGh8Q9FXrr731t2qHGwAafDy5e (source 626d9d1)
+Environment:
+  - INTERLOCK_ENVIRONMENT=production
+  - INTERLOCK_EXECUTION_MODE=simulation
+  - INTERLOCK_DEMO_BASELINE_ENABLED=false
+  - fresh INTERLOCK_SIGNING_SECRET
+  - APP_BASE_URL=https://interlock-recall.vercel.app
+  - same DATABASE_URL_APP / Walrus credentials and MEMWAL_NAMESPACE=interlock as instructed
+Smoke:
+  - Public root returned 200; /api/health returned status ok with environment=production, mode=simulation, baselineEnabled=false.
+  - /demo returned 404 after the proxy guard.
+  - Production login succeeded and a live Scout observation + Walrus FACT verification completed before Vercel's Security Checkpoint started challenging this automation IP.
+  - Subsequent automated requests were challenged by Vercel (403 x-vercel-mitigated: challenge). This is infrastructure bot mitigation, not an app 5xx or regression; a human browser completes the checkpoint.
+Domain warning: interlock.vercel.app is an unrelated Vercel app and must not be submitted.
+Residual: production shares the provided preview Neon/Walrus synthetic data plane; separate isolation/backup is post-hackathon hardening.
+```

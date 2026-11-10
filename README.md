@@ -4,28 +4,27 @@ Interlock is a decision audit tool that lets one agent's verified Walrus Memory 
 
 ## Quick Start — Try It Now
 
-**Protected preview:** <https://interlock-hud4jt7nr-uhhh2.vercel.app>
+**Live production:** <https://interlock-recall.vercel.app>  
+**Access:** public. Create an account at `/setup`, then create a workspace; no demo credentials are published. Use `interlock-recall.vercel.app` for submission — **do not use `interlock.vercel.app`**, which belongs to an unrelated app.
 
-**Access:** Vercel Authentication is enabled. Request access from the operator with the Vercel account email you will use; there are no public demo credentials in this repository.
+The preview-only `/demo` comparison returns **404** in production. The video and protected preview retain the comparison harness.
 
-> **Production URL status (submission blocker):** `https://interlock.vercel.app` is **not this project** — it currently serves an unrelated Vercel app. Interlock production is not deployed because the operator has not provided a production domain under this Vercel project or a separate production Neon project/branch, Managed Auth configuration and backup/rollback path. Do not submit `interlock.vercel.app` as this product's URL until that is resolved.
-
-### The exact click path (about 2–3 minutes after sign-in)
+### The exact click path (about 2–3 minutes)
 
 | Step | Action | Expected outcome |
 |---|---|---|
-| 1 | Sign in at `/login` | Workspace dashboard loads with the real workspace and role. |
+| 1 | Open `/setup`, create an account, then create a workspace (or sign in at `/login`) | Workspace dashboard loads with the real workspace and OWNER role. |
 | 2 | Open **Observations** → **Run Scout** with the funded public SUI address prefilled | Tatum returns a non-zero balance; a FACT is written to Walrus and verified by recall. |
 | 3 | Open **Settings** → **Exposure policy**; keep/record `1000` bps and submit | A verified `MAX_EXPOSURE_BPS` CONSTRAINT appears as active. |
 | 4 | Open **Plans → Create plan**; amount `100000000` MIST, exposure `1500` bps, submit | An immutable plan hash is created. |
 | 5 | Open the plan → **Evaluate with Sentinel** | The decision returns **REJECT** with reason `EXPOSURE_BPS_EXCEEDED`. |
 | 6 | Open the decision → **Cited evidence** | The FACT and CONSTRAINT are marked VERIFIED with Walrus blob IDs, hashes and authors. |
 | 7 | Copy a blob/hash or open the **Tatum anchor** panel | Provenance labels show the exact observation, provider, method, balance and timestamp. |
-| 8 | Open **Demo compare** → **Run comparison** | Same plan hash: unguarded baseline says WOULD PASS; protected path says REJECT with real citations. |
+| 8 | Open **Audit trail** | A `DECISION_FINALIZED` event is present with the verdict, reason code and plan hash. |
 
 A compliant `500` bps plan reaches **APPROVE** and exposes **Simulate once**; after one simulation the control is replaced by the execution record and replay returns `ALREADY_SIMULATED`. A missing policy, stale observation, incomplete recall or unverified record returns **HOLD**.
 
-If you do not have preview access, run the local flow in **Development** below. The product is simulation-only: no funds move, no wallet is connected and no transaction is submitted.
+If you prefer a local run, follow **Development** below. The product is simulation-only: no funds move, no wallet is connected and no transaction is submitted. If a Vercel Security Checkpoint appears, complete the browser check and retry.
 
 ## Architecture
 
@@ -92,7 +91,8 @@ Full strategy: `docs/TESTING.md`. Evidence: `docs/BUILD_LOG.md`.
 ## Deployment
 
 - **Preview:** Vercel project `interlock`, Vercel Authentication, target `preview`.
-- **Production:** blocked pending a domain under this project and separate production Neon/Walrus credentials plus a verified backup/rollback path. No production deployment or migration has been performed.
+- **Production:** `https://interlock-recall.vercel.app`; Vercel project `interlock-recall`; production env is separate from preview `APP_BASE_URL`, `INTERLOCK_ENVIRONMENT=production`, `INTERLOCK_DEMO_BASELINE_ENABLED=false` and a fresh signing secret.
+- **Preview-only:** `/demo` returns 404 in production. The Memory OFF/ON comparison remains available in the protected preview and demo video.
 - Details and env names: `docs/DEPLOYMENT.md`.
 
 ## Troubleshooting

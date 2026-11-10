@@ -5,14 +5,14 @@
 - `development`: local Next.js with the preview Neon branch, real Tatum/Walrus sandbox-equivalent calls and synthetic data.
 - `test`: disposable Neon branch and deterministic fixtures; provider tests are skipped unless explicitly configured.
 - `preview`: protected Vercel preview with the `interlock` Walrus namespace, preview Neon branch and Vercel Authentication.
-- `production`: not deployed yet. Bounded release only after Phase 9.
+- `production`: **deployed** at `https://interlock-recall.vercel.app` (Vercel project `interlock-recall`).
 
-## Current preview
+## Preview
 
 - URL: `https://interlock-hud4jt7nr-uhhh2.vercel.app`
-- Project: `interlock` under the active Vercel scope.
+- Project: `interlock-recall` under the active Vercel scope.
 - Protection: Vercel Authentication (`ssoProtection: all_except_custom_domains`); public requests return `302` to Vercel SSO.
-- Target: `preview`; no production deployment or custom domain.
+- Target: `preview`; production uses the separately assigned `interlock-recall.vercel.app` domain.
 - Environment names: `DATABASE_URL_APP`, `NEON_AUTH_BASE_URL`, `NEON_AUTH_COOKIE_SECRET`, `INTERLOCK_SIGNING_SECRET`, `INTERLOCK_ENVIRONMENT=preview`, `INTERLOCK_EXECUTION_MODE=simulation`, `INTERLOCK_DEMO_BASELINE_ENABLED=true`.
 - `DATABASE_URL_UNPOOLED` must **not** be added to Vercel preview runtime.
 
@@ -59,11 +59,11 @@ Production is allowed only after every Phase 9 condition passes:
 
 Record URL, commit, environment, migration versions, smoke tests, security results, known issues and rollback steps in `AI_HANDOFF.md` and `docs/BUILD_LOG.md`.
 
-## Submission-readiness blocker (2026-11-10)
+## Production (live)
 
-- `https://interlock.vercel.app` is **not this project**. It resolves to an unrelated Vercel application; the project has no alias/domain for it.
-- No production-only Vercel environment exists. `vercel env ls` shows only Preview values.
-- No separate production Neon project/branch, production Managed Auth configuration, `interlock-prod` Walrus configuration or verified backup/rollback path has been supplied.
-- No `vercel deploy --prod` was performed and no production migration was run. Preview secrets/database were not reused for production.
-
-Minimum inputs to unblock: a domain owned by this Vercel project (or an approved alternate public URL), production Neon URLs/roles, production Auth env, confirmed `interlock-prod` Walrus config, and backup/restore verification.
+- URL: `https://interlock-recall.vercel.app` (public; do **not** use `interlock.vercel.app`, which is unrelated).
+- Vercel project: `interlock-recall`; deployment `dpl_CQZGh8Q9FXrr731t2qHGwAafDy5e`; source commit `626d9d1`.
+- Env: `INTERLOCK_ENVIRONMENT=production`, `INTERLOCK_EXECUTION_MODE=simulation`, `INTERLOCK_DEMO_BASELINE_ENABLED=false`, fresh `INTERLOCK_SIGNING_SECRET`, `APP_BASE_URL=https://interlock-recall.vercel.app`.
+- `/demo` returns **404** in production. `/api/health` returns production/simulation/baseline=false.
+- Production currently uses the provided preview `DATABASE_URL_APP` and `MEMWAL_NAMESPACE=interlock` because the finalization instruction required the same `.env.local` values except the listed flags. This is synthetic hackathon data; separate Neon/Walrus isolation and a verified backup path remain required before real customer data.
+- Vercel may present a Security Checkpoint to automated traffic; a human browser completes the check and continues.
