@@ -3,12 +3,12 @@
 ## Current status
 
 - Product: **Interlock** — one agent's verified memory can prevent another agent from executing a policy-violating action.
-- Implementation phase: **Phase 5 complete — end-to-end safety gate passed; demo comparison verified.**
+- Implementation phase: **Phase 6 complete — reference-led responsive interface pass.**
 - Application: authenticated operations console with live Tatum, Walrus, Sentinel and Runner flows.
 - Repository: `https://github.com/onyebuchidaniel60/interlock`, branch `main`.
-- Phase 4 commit: **`5c03b94`**; Phase 5 commit: **`d141f0c`** (`test: verify interlock end-to-end safety flows`).
-- Preview URL: **https://interlock-cm133bp8u-uhhh2.vercel.app**
-- Deployed source commit: **`d141f0c`**; target: preview.
+- Phase 4 commit: **`5c03b94`**; Phase 5: **`d141f0c`**; Phase 6: **`a8aa450`** (`feat: implement reference-led interlock interface`).
+- Preview URL: **https://interlock-w9g75cpnj-uhhh2.vercel.app**
+- Deployed source commit: **`a8aa450`**; target: preview.
 - Protection: **Vercel Authentication**; public requests `302` to Vercel SSO; automation bypass empty.
 - Neon: preview database, `app_user` (`NOBYPASSRLS`) application queries, versioned migrations applied through `neondb_owner`.
 - Managed Better Auth: real sign-up/sign-in/sign-out, invite links, OWNER/OPERATOR/OBSERVER membership.

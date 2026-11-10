@@ -356,3 +356,31 @@ Blocked work: none.
 Next task: Phase 6 — reference-led UI and StageShow skill.
 Authorization boundary: preview only; production gated to Phase 9.
 ```
+
+## Phase 6 — reference-led interface and responsive pass
+
+```text
+Date/time: 2026-11-10T08:26Z
+Phase: Phase 6 — reference-image-led final UI implementation + UI skills
+Git commit: a8aa450 (feat: implement reference-led interlock interface)
+Skills:
+  - npx skills add benjitaylor/skills --skill stageshow installed successfully.
+  - Security assessments: Gen Safe, Socket 0 alerts, Snyk Low risk.
+  - Inspected SKILL.md; it targets faux marketing UI, not production consoles. Applied restraint/framing/hierarchy guidance; did not import its stage kit.
+Changes:
+  - Refined shell labels, workspace identity, footer and live-status copy.
+  - Constrained table scroll containers and panel min-widths to eliminate responsive overflow.
+  - Verified all authenticated data pages at 390, 768 and 1280 px.
+  - Added StageShow/design decisions to docs/DESIGN_NOTES.md.
+Commands:
+  - E2E_AUTH_STATE=<local> npm run test:e2e -- tests/e2e/responsive-auth.spec.ts (6/6)
+  - E2E_AUTH_STATE=<local> npm run test:e2e -- tests/e2e/auth.spec.ts (6/6)
+  - npm run test:e2e -- tests/e2e/shell.spec.ts (10/10)
+  - npm run typecheck; npm run lint; npm test (14)
+  - npm run build
+Preview URL: https://interlock-w9g75cpnj-uhhh2.vercel.app
+Deployed commit: a8aa450
+Known issues: final visual polish/demo video remains.
+Next task: Phase 7 — documentation and frontend completeness.
+Authorization: preview only; production gated to Phase 9.
+```
