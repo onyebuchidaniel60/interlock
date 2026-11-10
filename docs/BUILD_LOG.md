@@ -384,3 +384,26 @@ Known issues: final visual polish/demo video remains.
 Next task: Phase 7 — documentation and frontend completeness.
 Authorization: preview only; production gated to Phase 9.
 ```
+
+## Phase 7 — documentation and frontend completeness
+
+```text
+Date/time: 2026-11-10T08:30Z
+Phase: Phase 7 — frontend completeness and documentation
+Git commit: docs checkpoint follows
+Changes:
+  - README rewritten for the functional MVP, preview journeys, local commands, API, architecture and limitations.
+  - SETUP updated for Neon roles, Managed Better Auth, migrations, first workspace and verification.
+  - DEPLOYMENT updated with preview URL/protection, env names, preview-only rules and Phase 9 production gate.
+  - TROUBLESHOOTING updated for auth origin, RLS, migrations, Tatum, Walrus, Sentinel/Runner and Vercel.
+  - OPERATOR_GUIDE updated to the real observation/policy/plan/Sentinel/simulation flow.
+  - API docs list implemented endpoints, roles and error envelope.
+  - Repository structure documents db/proto/tests/service boundaries.
+Commands: npm run typecheck; npm run lint; npm test; npm run build
+Tests: 14 unit; 6 integration; 10 shell; 6 auth; 6 responsive; live demo desktop PASS.
+Preview URL: https://interlock-q8n7d5x66-uhhh2.vercel.app
+Deployed commit: pending final Phase 7 deploy
+Known issues: demo video pending; production gated.
+Next task: Phase 8 — reviewed demo video.
+Authorization: preview only; production gated to Phase 9.
+```

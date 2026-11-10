@@ -2,54 +2,97 @@
 
 **A shared-memory execution safety layer for multi-agent applications.** Interlock lets one agent's verified discovery prevent another agent from executing an action that violates a known constraint.
 
-> **Status: Phase 1 preview shell.** The application is a navigable, protected preview with clearly labelled placeholders. Provider adapters, authentication, deterministic decision logic and the demo are not implemented yet. Do not claim otherwise.
+> **Status: functional MVP.** Authentication, Neon/RLS, Tatum observations, Walrus Memory writes/recall, deterministic Sentinel decisions, one-time simulated execution and the Memory OFF/ON demo comparison are implemented and tested. The demo video is still pending.
 
-**Protected preview:** <https://interlock-ff4vlqtne-uhhh2.vercel.app> (Vercel Authentication required)
+**Protected preview:** <https://interlock-q8n7d5x66-uhhh2.vercel.app> (Vercel Authentication required)
 
-## Product concept
+## What it does
 
-- **Scout** observes facts and records evidence.
-- **Analyst** drafts a structured explanation; it never decides policy.
-- **Sentinel** retrieves and verifies shared memory, then deterministically returns APPROVE, REJECT or HOLD.
-- **Runner** can only perform a simulated action after a signed, short-lived, single-use Sentinel approval.
+- **Scout** reads a public Sui balance from Tatum, persists an immutable observation, writes a typed FACT to Walrus Memory and verifies the recalled payload before activation.
+- **Analyst** may draft explanatory text through Groq. It has no policy authority.
+- **Sentinel** enumerates applicable evidence deterministically, recalls the exact Walrus records, verifies namespace/author/blob/hash, applies fixed integer rules and writes a VERDICT memory.
+- **Runner** accepts only a final APPROVE with a verified VERDICT memory. It mints a short-lived, plan/workspace/decision-bound, single-use clearance and records one simulation. No transaction is submitted.
 
-Walrus Memory mainnet is the persistent memory layer. Neon Postgres stores deterministic typed metadata and application state. Tatum provides read-only Sui observations. Groq may help Analyst explain a plan but cannot approve, reject or authorize execution.
+Walrus Memory mainnet is the memory system of record. Neon Postgres is the deterministic index and application-state store. Tatum provides read-only Sui observations.
 
 ## Safety boundary
 
-The MVP is simulation-only. No real trading, transfers, wallet custody, private-key collection, signing or payment execution. Missing, stale, conflicting or unverifiable evidence produces HOLD. The Memory OFF comparison is restricted to a protected preview/test baseline and must be impossible in production.
+The MVP is simulation-only. No real trading, transfers, wallet custody, private-key collection, signing or payment execution. Missing, stale, conflicting or unverifiable evidence produces HOLD. The Memory OFF baseline exists only in an explicitly enabled protected preview and startup fails if it is enabled in production.
+
+## Preview journeys
+
+1. Sign in or create an account, then create/join a workspace.
+2. Open **Observations** → run Scout with the funded public demo address.
+3. Open **Settings** → record a 1000 bps (10%) exposure policy.
+4. Open **Plans → Create plan** → enter 1500 bps (15%) and run Sentinel.
+5. Open the decision → inspect the cited Walrus evidence and REJECT reason.
+6. Run the **Demo compare** route for the same-plan Memory OFF/ON comparison.
+7. A 500 bps plan can reach APPROVE and one simulated execution; a second simulation is blocked.
 
 ## Local development
 
 ```bash
 npm install
-cp .env.example .env.local   # fill only the providers you are testing; never commit it
-npm run dev                  # http://localhost:3000
-npm run check                # typecheck + lint + unit tests
-npm run build                # production build
-npm run test:e2e             # Playwright route/responsive tests (uses port 3127)
+cp .env.example .env.local       # provider values; never commit this file
+npm run db:migrate               # DATABASE_URL_UNPOOLED, neondb_owner only
+npm run dev                      # http://localhost:3000
+npm run check                    # typecheck + lint + 14 unit tests
+npm run test:integration         # Neon RLS + live Tatum + Walrus decision pipeline
+npm run build
+npm run test:e2e                 # public shell/protection tests (production build, port 3127)
+E2E_AUTH_STATE=/path/to/state.json npm run test:e2e -- tests/e2e/auth.spec.ts
+E2E_AUTH_STATE=/path/to/state.json E2E_LIVE_DEMO=1 npm run test:e2e -- tests/e2e/live-demo.spec.ts
 ```
 
-The current preview shell does not require provider credentials. Phase 2 adds Neon Postgres, Managed Better Auth and RLS; Phase 3 adds the Walrus, Tatum and Groq adapters.
+Local `.env.local` is ignored. The preview does not use production secrets or customer data.
 
-## Handoff documents
+## Architecture at a glance
 
-- `INTERLOCK_IMPLEMENTATION_BLUEPRINT.md` — consolidated blueprint.
-- `PROJECT_SPEC.md` — product, scope, workflows, rules, functional requirements and acceptance criteria.
-- `ARCHITECTURE.md` — technical architecture, integration boundaries and security.
-- `IMPLEMENTATION_PLAN.md` — phase-by-phase autonomous plan.
-- `AGENTS.md` — persistent coding agent instructions.
-- `AI_HANDOFF.md` — current state and exact next task.
-- `OPERATOR_INTAKE.md` — readiness check and authority boundaries.
-- `REFERENCE_ASSETS.md` — four supplied reference images and design observations.
-- `DEMO_VIDEO_PLAN.md` — 3-minute maximum demo plan.
-- `design/reference/` — operator-supplied UI reference images.
-- `docs/` — setup, config, tests, deployment, API, data model, build log and operator guide.
+```text
+Browser → Neon Managed Better Auth session
+       → Next.js 16 Route Handlers / Server Actions
+       → Scout: Tatum Sui gRPC + Walrus FACT
+       → Sentinel: Neon candidate index + Walrus recall + deterministic rules + VERDICT
+       → Runner: signed one-time clearance + simulation record
+```
 
-## Current status
+- `DATABASE_URL_UNPOOLED` (`neondb_owner`) is migration-only.
+- `DATABASE_URL_APP` (`app_user`, `NOBYPASSRLS`) serves all app queries.
+- RLS uses request-scoped `app.user_id`; `auth.uid()` is not available.
+- Walrus evidence must pass metadata + exact recall + SHA-256 + author verification.
 
-Phase 0 complete; **Phase 1 complete** with a protected Vercel preview and a responsive route shell. No database, authentication, provider adapter, decision engine or demo exists yet. Production remains gated to Phase 9. The operator reports `SUI_DEMO_ADDRESS` is now funded; independent Tatum re-verification is scheduled for Phase 3.
+## API
 
-## Authoritative methodology
+- `POST /api/observations` — read-only Tatum observation + Scout FACT.
+- `POST /api/policies` — owner-only verified CONSTRAINT.
+- `POST /api/plans` — immutable plan.
+- `POST /api/plans/:id/check` — deterministic Sentinel evaluation + VERDICT.
+- `POST /api/decisions/:id/simulate` — one-time simulation.
+- `GET /api/health` — process health.
+- `GET /api/readiness` — session, membership and `app_user` RLS proof.
 
-The project follows the operator-supplied `PROPER_VIBE_CODING_WORKFLOW_AUTONOMOUS.md`: one complete intake, autonomous internal checkpoints, early skeletal preview, end-to-end functionality before final UI refinement, direct reference-image implementation, complete documentation and a reviewed <=180-second demo video.
+All mutations require a verified session, workspace membership and role; client-supplied workspace/role/verdict is never trusted. See `docs/API.md`.
+
+## Documentation
+
+- `docs/SETUP.md` — local setup and migration.
+- `docs/CONFIGURATION.md` — environment variables and role boundaries.
+- `docs/TESTING.md` — unit/integration/E2E/security test plan.
+- `docs/DEPLOYMENT.md` — Vercel preview and production gate.
+- `docs/TROUBLESHOOTING.md` — common failures.
+- `docs/OPERATOR_GUIDE.md` — demo operator flow.
+- `docs/DESIGN_NOTES.md` — reference-led visual decisions.
+- `docs/BUILD_LOG.md` — phase-by-phase evidence.
+- `AI_HANDOFF.md` — current state, commits and next task.
+- `PROJECT_SPEC.md` / `ARCHITECTURE.md` — product and architecture source of truth.
+
+## Current limitations
+
+- Production is not deployed; the release remains gated to Phase 9.
+- The demo video is pending Phase 8.
+- Analyst is optional and fallback-first; Sentinel never depends on it.
+- The interface is reference-led but intentionally functional rather than a marketing site.
+
+## License and assets
+
+The four UI reference images in `design/reference/` are operator-owned originals. The product does not copy third-party logos, trade dress or text. Sui API protobufs are vendored from `MystenLabs/sui-apis` (Apache-2.0).

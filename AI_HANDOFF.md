@@ -3,10 +3,10 @@
 ## Current status
 
 - Product: **Interlock** — one agent's verified memory can prevent another agent from executing a policy-violating action.
-- Implementation phase: **Phase 6 complete — reference-led responsive interface pass.**
+- Implementation phase: **Phase 7 complete — operator/product documentation and frontend completeness.**
 - Application: authenticated operations console with live Tatum, Walrus, Sentinel and Runner flows.
 - Repository: `https://github.com/onyebuchidaniel60/interlock`, branch `main`.
-- Phase 4 commit: **`5c03b94`**; Phase 5: **`d141f0c`**; Phase 6: **`a8aa450`** (`feat: implement reference-led interlock interface`).
+- Phase 4: **`5c03b94`**; Phase 5: **`d141f0c`**; Phase 6: **`a8aa450`**; Phase 7 docs commit follows.
 - Preview URL: **https://interlock-w9g75cpnj-uhhh2.vercel.app**
 - Deployed source commit: **`a8aa450`**; target: preview.
 - Protection: **Vercel Authentication**; public requests `302` to Vercel SSO; automation bypass empty.
@@ -19,6 +19,17 @@
 - Groq Analyst: adapter with deterministic fallback; no policy authority; not required for safety.
 - Production: not deployed; bounded Phase 9 release only.
 - Budget: **$0 unapproved spend; free tiers only.**
+
+## Phase 7 delivered
+
+- README now documents the functional MVP, preview journeys, local commands, API, architecture and limitations.
+- SETUP covers Neon roles, auth, migrations, first workspace and verification.
+- DEPLOYMENT records the protected preview, env names, preview-only rules and Phase 9 production gate.
+- TROUBLESHOOTING covers auth origin, RLS, migrations, Tatum/Walrus, Sentinel/Runner and Vercel.
+- OPERATOR_GUIDE describes the actual observation → policy → plan → Sentinel → simulation flow.
+- API documentation lists implemented endpoints and safe error envelopes.
+- Repository structure records db/proto/tests and service boundaries.
+- StageShow attempt and responsive decisions are in DESIGN_NOTES.
 
 ## Phase 5 delivered
 
@@ -70,16 +81,16 @@
 6. Production startup fails if the demo baseline is enabled or execution mode is not simulation.
 7. Runner clearance is HMAC-signed, 60 seconds max, plan/workspace/decision-bound and one-time via unique constraints.
 
-## Next task — Phase 6
+## Next task — Phase 8
 
-Attempt the required StageShow UI skill, then implement the reference-led visual pass using `design/reference/`:
+Produce the reviewed demo video per `DEMO_VIDEO_PLAN.md`:
 
-1. Run `npx skills add benjitaylor/skills --skill stageshow`; inspect and apply relevant guidance.
-2. Refine the shell, typography, spacing, tables, evidence panel and responsive behavior to the supplied references.
-3. Add complete loading, empty, validation, success, failure, permission-denied and not-found states.
-4. Verify keyboard focus, labels, contrast, reduced motion and mobile/tablet layouts.
-5. Keep all real backend behavior intact; no fabricated data or dead controls.
-6. Update AI_HANDOFF/BUILD_LOG/DESIGN_NOTES, commit `feat: implement reference-led interlock interface`, deploy preview, continue to Phase 7.
+1. Use deterministic existing demo data or run the live comparison once; capture real UI with Playwright video.
+2. Generate narration with Kokoro TTS (Apache-2.0, local); fall back to Piper only if Kokoro cannot run. Record engine/voice in `demo/production-notes.md`.
+3. Keep <=180 seconds (target 90–150), synchronize narration to visible behavior, add captions where feasible.
+4. Redact secrets, tokens, private URLs, personal email and private account IDs; truncate wallet addresses if needed.
+5. Verify video/audio playback and exact duration.
+6. Save outputs to `demo/`, update DEMO_VIDEO_PLAN/AI_HANDOFF/BUILD_LOG, commit `docs: add reviewed interlock demo production artifacts`, continue to Phase 9.
 
 ## Known issues / limitations
 

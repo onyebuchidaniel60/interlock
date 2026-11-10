@@ -2,41 +2,59 @@
 
 ## Environments
 
-- `development`: local development with disposable/sandbox Neon branch and provider mocks where appropriate.
-- `test`: automated test services, disposable Neon branches and deterministic fixtures.
-- `preview`: protected Vercel preview, separate Neon project/branch, safe synthetic data, `interlock` Walrus namespace and explicitly approved test integrations.
-- `production`: not enabled until Phase 9 and the bounded release authority in `OPERATOR_INTAKE.md`; separate Neon project/branch and `interlock-prod` namespace.
+- `development`: local Next.js with the preview Neon branch, real Tatum/Walrus sandbox-equivalent calls and synthetic data.
+- `test`: disposable Neon branch and deterministic fixtures; provider tests are skipped unless explicitly configured.
+- `preview`: protected Vercel preview with the `interlock` Walrus namespace, preview Neon branch and Vercel Authentication.
+- `production`: not deployed yet. Bounded release only after Phase 9.
 
-## Phase 1 preview
+## Current preview
 
-Deploy a route-complete skeletal shell as early as practical. Use a dedicated preview Neon project/branch (never the production branch) and the `interlock` Walrus namespace. Do not copy production secrets or customer data. Configure Vercel Authentication protection. Record exact preview URL, Git SHA/commit, deploy timestamp and environment in `AI_HANDOFF.md`.
+- URL: `https://interlock-q8n7d5x66-uhhh2.vercel.app`
+- Project: `interlock` under the active Vercel scope.
+- Protection: Vercel Authentication (`ssoProtection: all_except_custom_domains`); public requests return `302` to Vercel SSO.
+- Target: `preview`; no production deployment or custom domain.
+- Environment names: `DATABASE_URL_APP`, `NEON_AUTH_BASE_URL`, `NEON_AUTH_COOKIE_SECRET`, `INTERLOCK_SIGNING_SECRET`, `INTERLOCK_ENVIRONMENT=preview`, `INTERLOCK_EXECUTION_MODE=simulation`, `INTERLOCK_DEMO_BASELINE_ENABLED=true`.
+- `DATABASE_URL_UNPOOLED` must **not** be added to Vercel preview runtime.
+
+Deploy:
+
+```bash
+SHA=$(git rev-parse HEAD)
+vercel deploy --environment preview --yes \
+  --meta githubCommitSha="$SHA" --meta githubCommitRef=main
+```
+
+Never use `--prod` before Phase 9. The first deployment of a brand-new Vercel project may be auto-promoted to production by the platform; delete that deployment and create an explicit preview.
 
 ## Migrations
 
-- Use version-controlled SQL migrations applied through the Neon migration role (`DATABASE_URL_UNPOOLED`, `neondb_owner`).
-- Application runtime uses `DATABASE_URL_APP` (`app_user`, `NOBYPASSRLS`); never use the migration URL in the app.
-- Apply to local/test/preview branches first.
-- Verify `current_user`, role attributes, RLS and data ownership before preview.
-- Never use destructive schema operations against production without bounded authority and a verified backup/rollback path.
-- Do not apply migrations to production merely because preview deploy is authorized.
+```bash
+# DATABASE_URL_UNPOOLED must point to the preview branch; role must be neondb_owner
+npm run db:migrate
+```
 
-## Preview safety
+- Application runtime uses `DATABASE_URL_APP` (`app_user`, `NOBYPASSRLS`).
+- Verify `select current_user` and `rolbypassrls` after deployment.
+- Never apply preview migrations to production merely because a preview is authorized.
 
-- `INTERLOCK_EXECUTION_MODE=simulation`.
-- `INTERLOCK_DEMO_BASELINE_ENABLED=true` only if explicitly enabled for protected preview and only after server config guard.
-- Only public demo wallet address and synthetic plan data.
-- No production secrets, customer records, real payment or irreversible actions.
+## Production release gate (Phase 9)
 
-## Production release
+Production is allowed only after every Phase 9 condition passes:
 
-Production release is bounded by `OPERATOR_INTAKE.md`. After Phase 9 passes, the agent may create a Vercel production deployment for `interlock` and apply version-controlled Neon migrations to a production database only after a verified backup/rollback path exists. Production uses a separate Neon project/branch and `interlock-prod` Walrus namespace; no preview secrets are copied. No DNS changes, public marketing beyond the app, or production data import without separate approval. Startup must fail unless `INTERLOCK_EXECUTION_MODE=simulation` and `INTERLOCK_DEMO_BASELINE_ENABLED=false`.
-
-If any production action is outside that bounded authorization, do not perform it. Deliver verified preview, exact release commands, required secret names, migration order, rollback instructions and a smoke-test checklist.
+1. Final regression/security suite green.
+2. Separate Neon production project/branch provisioned and a verified backup/rollback path exists.
+3. Separate `interlock-prod` Walrus namespace and production-only secrets.
+4. `INTERLOCK_DEMO_BASELINE_ENABLED=false` and `INTERLOCK_EXECUTION_MODE=simulation`; startup fails otherwise.
+5. Version-controlled migrations applied through `DATABASE_URL_UNPOOLED` as `neondb_owner`.
+6. Vercel production deployment for `interlock`; no DNS changes, no public marketing, no production data import.
+7. If any production Neon credential or backup path is missing, stop and report; never reuse preview secrets.
 
 ## Rollback
 
-Document the Vercel deployment rollback procedure and migration rollback strategy. Prefer forward-fix migrations over destructive rollback where data loss could occur. Do not automatically drop tables/data. If schema changes are irreversible, pause and request operator intervention.
+- Vercel: promote the previous deployment; no custom domain.
+- Database: prefer forward-fix migrations; restore from the verified Neon branch/backup for destructive failures.
+- Walrus: never delete memory records; supersede with a new record and audit event.
 
 ## Release evidence
 
-Record URL, Git commit, environment, migration IDs, smoke tests, E2E/security suite results, known issues, authorization record and rollback steps in `AI_HANDOFF.md` and BUILD_LOG.
+Record URL, commit, environment, migration versions, smoke tests, security results, known issues and rollback steps in `AI_HANDOFF.md` and `docs/BUILD_LOG.md`.

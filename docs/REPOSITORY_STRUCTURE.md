@@ -125,3 +125,24 @@ interlock/
 - `docs/`: operating documentation; update BUILD_LOG at each checkpoint.
 
 Do not create separate microservices or queues unless a proven requirement appears and the operator approves an architecture change. The MVP should remain a single application with modular domain boundaries.
+
+## Implemented additions (Phases 1–6)
+
+```text
+db/migrations/                 versioned schema, RLS, functions
+proto/                         pinned official Sui API protobufs
+scripts/migrate.mjs            neondb_owner migration runner
+src/lib/domain/                canonical hash, Zod schemas, Sentinel, clearance
+src/lib/integrations/          Tatum gRPC, Walrus Memory, Groq
+src/lib/services/              observation/constraint/plan/decision/simulation
+src/lib/queries.ts             tenant-scoped read models
+src/app/api/observations/      Scout API
+src/app/api/policies/          policy API
+src/app/api/plans/             plan + check APIs
+src/app/api/decisions/         simulation API
+src/app/api/readiness/         session/membership/RLS proof
+tests/integration/             Neon RLS, live Tatum, live decision pipeline
+tests/e2e/                     public shell, auth, responsive, live demo
+```
+
+The application remains one Next.js deployment. No Redis, Kafka, separate vector database, wallet custody or real execution adapter exists.

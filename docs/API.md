@@ -195,3 +195,34 @@ Do not expose stack traces, SQL, provider credentials, keys, raw authorization h
 ## Internal-only services
 
 Scout, Analyst, Sentinel and Runner domain services are not public endpoints. Route Handlers invoke them after user authorization. No browser-provided agent identity is accepted. All service-to-service operations use typed internal interfaces and server-only credentials.
+
+## Implemented MVP endpoints (Phase 4/5)
+
+All user-facing endpoints require a valid Neon Managed Better Auth session and verified workspace membership. Mutations validate same-origin requests, Zod bodies and roles; client-supplied workspace IDs/roles/verdicts are ignored.
+
+| Method | Path | Role | Behavior |
+|---|---|---|---|
+| POST | `/api/observations` | Owner/Operator | Tatum `StateService.GetBalance` → immutable observation → Scout Walrus FACT → recall verification |
+| POST | `/api/policies` | Owner | Verified `MAX_EXPOSURE_BPS` CONSTRAINT |
+| POST | `/api/plans` | Owner/Operator | Immutable canonical plan + hash |
+| POST | `/api/plans/:id/check` | Owner/Operator | Deterministic candidate enumeration, Walrus recall verification, VERDICT write/recall, decision persistence |
+| POST | `/api/decisions/:id/simulate` | Owner/Operator | Re-verifies VERDICT, mints 60s single-use clearance, inserts one simulation |
+| GET | `/api/health` | Public | Process/phase/mode only; no secrets |
+| GET | `/api/readiness` | Member | Session + membership + `app_user` RLS proof |
+| GET/POST/... | `/api/auth/*` | Public auth | Origin-validated Neon Auth proxy |
+
+### Error envelope
+
+```json
+{ "error": { "code": "STABLE_CODE", "message": "Safe user-facing message" } }
+```
+
+Expected codes include `UNAUTHENTICATED`, `NO_WORKSPACE`, `FORBIDDEN`, `OBSERVATION_STALE`, `ZERO_BALANCE`, `MEMORY_WRITE_FAILED`, `NO_POLICY`, `EVIDENCE_UNVERIFIED`, `NOT_APPROVED`, `VERDICT_MEMORY_UNVERIFIED`, `ALREADY_SIMULATED`. Raw provider errors, secrets and stack traces are not returned.
+
+### Success envelope
+
+```json
+{ "data": { "...": "resource-specific fields" } }
+```
+
+The API never returns a client-trusted verdict or clearance. Runner clearance stays server-side and is consumed atomically.

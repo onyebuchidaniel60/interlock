@@ -1,48 +1,80 @@
-# SETUP.md — Developer Setup (for implementation phase)
+# SETUP.md — Developer Setup
 
-This blueprint package contains no runnable application yet. This document defines the intended setup after a target repository has been selected and Phase 0 intake is complete.
+This repository contains a working Next.js 16 application with Neon Postgres, Managed Better Auth, Tatum gRPC, Walrus Memory and deterministic Sentinel/Runner services.
 
 ## Prerequisites
 
-- Node.js version supported by the selected pinned Next.js release.
-- Package manager chosen based on existing repository; preserve existing lockfile if repo has one.
-- Neon project/branch and the `app_user` application role; `DATABASE_URL_UNPOOLED` migration access and `DATABASE_URL_APP` application access.
-- Neon Managed Better Auth configured with `NEON_AUTH_BASE_URL` and a 32+ character `NEON_AUTH_COOKIE_SECRET`.
-- Access to dedicated Walrus Memory account/namespace and delegate keys.
-- Tatum API key and public Sui address for gRPC smoke testing.
-- Groq API key/model within the free-tier guard; deterministic Analyst fallback available.
+- Node.js 22.x and npm 10+.
+- A Neon project/branch with:
+  - `DATABASE_URL_UNPOOLED` for `neondb_owner` migrations.
+  - `DATABASE_URL_APP` for `app_user` with `NOBYPASSRLS`.
+  - Managed Better Auth enabled (`NEON_AUTH_BASE_URL`, `NEON_AUTH_COOKIE_SECRET`).
+- Dedicated Walrus Memory account/namespace and Scout/Policy/Sentinel/Runner delegate keys.
+- Tatum Sui mainnet gRPC key and a funded public Sui address.
+- Optional Groq key/model for Analyst; deterministic fallback is available.
 - Vercel project access for protected preview.
 
-## Setup sequence
-
-1. Clone/open the operator-confirmed repository and inspect its instructions.
-2. Install dependencies using the existing lockfile's package manager.
-3. Copy `.env.example` to local environment file and configure secret values through a secure local secret store. Never commit local env files.
-4. Connect to the approved Neon development/test branch; use `DATABASE_URL_UNPOOLED` only for migrations and `DATABASE_URL_APP` for the app.
-5. Apply version-controlled migrations through the migration role; verify `SELECT current_user` reports `app_user` from the application connection.
-6. Seed only the synthetic local/test workspace and demo data.
-7. Configure Neon Managed Better Auth and verify session creation/expiry.
-8. Run typecheck, lint and unit tests.
-9. Start the Next.js dev server.
-10. Run `/api/health`; test authentication and workspace isolation.
-11. Run provider smoke tests using the dedicated Walrus account and Tatum gRPC key/address. Do not execute against production customer data.
-
-## Commands
-
-The coding agent must add scripts consistent with the repo's package manager. Expected script equivalents:
+## Local setup
 
 ```bash
-<pm> install
-<pm> run dev
-<pm> run lint
-<pm> run typecheck
-<pm> run test
-<pm> run test:integration
-<pm> run test:e2e
+git clone https://github.com/onyebuchidaniel60/interlock.git
+cd interlock
+npm install
+cp .env.example .env.local
 ```
 
-Do not invent exact commands before inspecting the actual package scripts. Record selected commands in README and BUILD_LOG.
+Fill `.env.local` from the approved secret store. Never commit it. Notes:
 
-## Setup acceptance
+- `DATABASE_URL_UNPOOLED` is migration-only.
+- `DATABASE_URL_APP` is used by every application query as `app_user`.
+- `NEON_AUTH_COOKIE_SECRET` must be at least 32 characters.
+- `INTERLOCK_SIGNING_SECRET` must be a strong random value.
+- `INTERLOCK_ENVIRONMENT=preview` and `INTERLOCK_DEMO_BASELINE_ENABLED=true` are valid only for preview/test.
 
-A new developer can reproduce local startup from docs without access to production secrets. Missing provider credentials must produce honest “integration not configured” state and must not cause the app to fake a successful observation, memory write or approval.
+Apply migrations:
+
+```bash
+npm run db:migrate
+```
+
+This checks `current_user=neondb_owner` before applying `db/migrations/*.sql` and records versions in `schema_migrations`.
+
+Start the app:
+
+```bash
+npm run dev
+```
+
+Open `http://localhost:3000`. If port 3000 is occupied, use `npm run dev -- --port 3127` and keep the auth/origin allowlist in mind.
+
+## First workspace
+
+1. Open `/setup`.
+2. Create an account with email/password.
+3. Create the workspace (owner membership and five agent identities are created by a security-definer function).
+4. Open `/settings` and record a 1000 bps exposure policy for the funded public address.
+5. Open `/observations`, run Scout, then create a plan.
+
+## Verification
+
+```bash
+npm run typecheck
+npm run lint
+npm test
+npm run test:integration
+npm run build
+npm run test:e2e
+```
+
+Integration tests load `.env.local`; they skip if required variables are absent. The live pipeline writes synthetic Walrus memories and requires the funded demo address.
+
+For authenticated E2E, create a Playwright storage state after signing in and set `E2E_AUTH_STATE`. Set `E2E_LIVE_DEMO=1` for the live comparison test.
+
+## Common setup failures
+
+- **`current_user` is `neondb_owner` in app requests** — the application is using the wrong URL. Use `DATABASE_URL_APP`.
+- **`INVALID_ORIGIN` from Neon Auth** — auth requests must go through `/api/auth/[...path]`; the route validates the browser origin and forwards with the auth server origin.
+- **RLS sees zero rows** — `app.user_id` was not set in the transaction or membership is not ACTIVE.
+- **Walrus write pending/failed** — memory remains PENDING/FAILED, never ACTIVE. Check namespace/delegate/relayer.
+
+See `docs/TROUBLESHOOTING.md` for more.
