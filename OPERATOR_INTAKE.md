@@ -16,7 +16,7 @@
 | Database and auth | Supabase project URL/ref, access role, Auth enabled, migration permissions, preview vs prod project? | **Operator-authorized architecture change:** Supabase quota exhausted. Replace Supabase with **Neon** (Lakebase Postgres + Managed Better Auth). Preview and production use separate Neon projects/branches. | **ACCEPTED.** `DATABASE_URL_UNPOOLED` (role `neondb_owner`) is for migrations only. `DATABASE_URL_APP` (role `app_user`, `NOBYPASSRLS`) is for all application queries. Auth uses `NEON_AUTH_BASE_URL` + `NEON_AUTH_COOKIE_SECRET`; `@supabase/ssr` is removed. RLS is plain PostgreSQL; `auth.uid()` is unavailable. | Do not run application queries as `neondb_owner`; verify `SELECT current_user` is `app_user`. No destructive production migration without authority. |
 | Walrus Memory | Dedicated account ID, namespace, SDK access and delegated keys for Scout/Policy/Sentinel/Runner? | Dedicated account ID and four delegate keys are in `/root/interlock/.env.local` (values not recorded). Namespace `interlock` for preview, `interlock-prod` for production. Account is confirmed not shared or a sample account. | **VALIDATED BY SIGNED MAINNET WRITE** (see below). | Never disclose key values; no unapproved account sharing. |
 | Walrus test | Can a signed mainnet write complete, produce blob ID, list metadata and recall matching content? | **PASS.** Signed synthetic FACT write by Scout delegate → terminal success → blob ID `nOgMyB2p1dHhQT_HwSf6MPsWoGScPXMIStHJdlbnlR8`; `listMemories` metadata found in namespace `interlock`; recall returned the exact payload; namespace, author and SHA-256 verified. | **EVIDENCED** in `docs/BUILD_LOG.md`. SDK `@mysten-incubation/memwal@0.1.14`; relayer `https://relayer.memory.walrus.xyz`; relayer version `0.1.0`. | Do not report integration available before evidence. A pending write or metadata-only result is not active memory. |
-| Tatum | API key in secret store and a public Sui mainnet demo address? | `TATUM_API_KEY`, `TATUM_SUI_GRPC_TARGET`, `SUI_DEMO_ADDRESS`, `SUI_COIN_TYPE` are present in `.env.local`. Target is `sui-mainnet-grpc.gateway.tatum.io`; address is public and valid-format; coin type `0x2::sui::SUI`. | **KEY AUTH AND METHOD VERIFIED; DEMO BALANCE NOT NON-ZERO.** `StateService.GetBalance` returned HTTP/gRPC success with exact fields `coinType=0x000…002::sui::SUI`, `balance="0"` (MIST), no `addressBalance`, no `coinBalance`, no checkpoint/finality fields. Operator stated the address was funded and non-zero; independent check through the authorized Tatum endpoint and a public Sui fullnode diagnostic both returned zero. | Never request private key/seed phrase. Do not silently use deprecated JSON-RPC or another provider. Fund/confirm `SUI_DEMO_ADDRESS` before the funded-balance demo path. |
+| Tatum | API key in secret store and a public Sui mainnet demo address? | `TATUM_API_KEY`, `TATUM_SUI_GRPC_TARGET`, `SUI_DEMO_ADDRESS`, `SUI_COIN_TYPE` are present in `.env.local`. Target is `sui-mainnet-grpc.gateway.tatum.io`; address is public and valid-format; coin type `0x2::sui::SUI`. | **KEY AUTH AND METHOD VERIFIED.** Phase 0 returned `balance="0"` MIST with no checkpoint/finality fields. The operator reports the address is now funded and non-zero; independent re-verification is scheduled for Phase 3 as instructed. | Never request private key/seed phrase. Do not silently use deprecated JSON-RPC or another provider. Re-check the funded balance in Phase 3 and stop at Phase 5 if it is zero. |
 | Tatum method | Does Tatum support `StateService.GetBalance` with current official proto? | **YES.** Exact method `/sui.rpc.v2.StateService/GetBalance` succeeded over TLS with `x-api-key` against `sui-mainnet-grpc.gateway.tatum.io:443`, using official `MystenLabs/sui-apis` protos pinned at commit `79485a8328e2f58fa047e4ce1327704b412e958a`, proto `sui/rpc/v2/state_service.proto`. | **EVIDENCED** in `docs/BUILD_LOG.md`. Response contained only the fields listed above; no fabricated checkpoint/finality metadata. | Method support is proven; the zero balance is a data/configuration issue, not an unimplemented method. |
 | Analyst provider | OpenAI access, approved model, quota, daily request limit and dollar ceiling? | **Operator-authorized change: Groq replaces OpenAI.** Base URL `https://api.groq.com/openai/v1`; OpenAI-compatible SDK; server-only `GROQ_API_KEY`; model `qwen/qwen3.8-27b`, confirmed to support structured outputs on Groq. | **ACCEPTED.** Strict JSON schema required: `additionalProperties: false`, every property listed in `required`. Analyst has no policy authority; Sentinel remains deterministic. | No spend beyond explicit ceiling; no policy authority; model output never authorizes an action. |
 | Vercel | Project/team access, protected preview ability, domain? | Create project `interlock` under the active scope; protection **Vercel Authentication**; preview only; generated `*.vercel.app` URL; no custom domain. | **AUTHORIZED, NOT YET DEPLOYED.** No preview URL exists until Phase 1. | Preview permission is not production permission; no production secrets in preview. |
@@ -58,7 +58,8 @@
 - `addressBalance`: absent. `coinBalance`: absent. Checkpoint/finality fields: absent.
 - `ListBalances`: returned an empty response for the address.
 - Diagnostic only: the public Sui fullnode `fullnode.mainnet.sui.io:443` also returned `balance="0"` for the same address. This diagnostic did not replace Tatum and is not part of the application integration.
-- **Open demo-data action:** fund or replace `SUI_DEMO_ADDRESS` with a non-zero public Sui mainnet address before the funded-balance demo path. The zero balance is a supported product state (display zero / block exposure plan / HOLD), so it does **not** block Phase 1 scaffold work; it does block a credible 10%-vs-15% demo until resolved.
+- **Operator update (Phase 1):** the operator reports `SUI_DEMO_ADDRESS` is now funded and returns a non-zero balance. This is an operator statement; independent re-verification is scheduled for Phase 3. If it still returns zero at Phase 5, stop and report.
+- **Phase 0 evidence retained:** the earlier zero-balance result is recorded in `docs/BUILD_LOG.md` and must not be misrepresented as a non-zero observation.
 
 ## Critical readiness checklist
 
@@ -77,15 +78,15 @@
 - [x] TTS choice and fallback recorded.
 - [x] GitHub footer link approved for the public repository.
 - [x] Support/legal destinations omitted rather than fabricated.
-- [ ] Fund or replace `SUI_DEMO_ADDRESS` for a non-zero demo observation (demo-data action, not a Phase 1 scaffold blocker).
+- [x] Operator reports `SUI_DEMO_ADDRESS` is funded; independent Phase 3 re-verification scheduled (stop at Phase 5 if still zero).
 
 ## Readiness result
 
 | Field | Value |
 |---|---|
-| Readiness | **READY for Phase 1**, with one recorded demo-data action: fund/confirm `SUI_DEMO_ADDRESS` before the funded-balance observation/demo path. |
-| Reviewed by | Coding agent during Phase 0 |
-| Date/time | 2026-11-10T05:07Z |
-| Blocking items | None for Phase 1 scaffold. Demo blocker only: `SUI_DEMO_ADDRESS` currently returns `balance="0"` MIST; no alternative address was authorized. |
+| Readiness | **READY — Phase 1 complete.** The operator reports the demo address is funded; independent re-verification is scheduled for Phase 3. |
+| Reviewed by | Coding agent during Phase 0/1 |
+| Date/time | 2026-11-10T06:37Z |
+| Blocking items | None for Phase 1. Demo funding is operator-reported; re-verify in Phase 3 and stop at Phase 5 if it is still zero. |
 | Explicit production authority | Bounded release granted after Phase 9 for exactly the actions recorded above; all other production actions remain DENIED. |
 | Architecture changes | Supabase → Neon (operator-authorized); OpenAI → Groq (operator-authorized); recorded in `ARCHITECTURE.md`, `docs/CONFIGURATION.md`, `docs/TESTING.md`, and `AI_HANDOFF.md`. |

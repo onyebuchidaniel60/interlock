@@ -116,3 +116,82 @@ Authorization boundary:
 ```
 
 The coding agent must append an evidence-based entry after every internal checkpoint. A skipped test must be marked skipped with reason, never passed. Do not record secrets, private keys, tokens or sensitive data.
+
+## Phase 1 — app shell and protected preview
+
+```text
+Date/time: 2026-11-10T06:40Z
+Phase: Phase 1 — repository/platform foundation + early skeletal frontend
+Git commit: f8d5260e11475adc81de7b9b2e3ec5ba4c1b417f (code); docs checkpoint commit follows
+Changes:
+  - Scaffolded Next.js 16.4.6 App Router, React 19.3.1, strict TypeScript, Tailwind CSS 4.3.5 and Lucide icons.
+  - Added responsive dark operations shell with desktop sidebar and mobile drawer.
+  - Added routes: /login, /setup, /dashboard, /observations, /memory, /plans, /plans/new, /plans/[id], /decisions/[id], /audit, /agents, /settings, /demo, /api/health, /, 404, error, loading.
+  - Added reusable UI components and clearly labelled phase placeholders; no fabricated memories, verdicts or provider evidence.
+  - Added runtime safety guard: production demo baseline and non-simulation execution modes fail closed.
+  - Added .env.example (names only), .gitignore verification, Prettier, ESLint, Vitest and Playwright configuration.
+  - Created Vercel project interlock with Next.js preset and Node 22.x; enabled Vercel Authentication protection.
+  - Deployed preview only; removed accidental first production deployment and disabled the temporary automation bypass.
+  - Updated README, AI_HANDOFF.md and OPERATOR_INTAKE.md for Phase 1.
+Commands run:
+  - npm install --no-audit --no-fund
+  - npm run typecheck
+  - npm run lint
+  - npm test
+  - npm run build
+  - npx playwright install chromium
+  - npm run test:e2e
+  - vercel project create interlock
+  - vercel link --yes --project interlock
+  - vercel project update interlock --framework nextjs --node-version 22.x --yes
+  - vercel env add INTERLOCK_ENVIRONMENT preview
+  - vercel env add INTERLOCK_EXECUTION_MODE preview
+  - vercel env add INTERLOCK_DEMO_BASELINE_ENABLED preview
+  - vercel deploy --environment preview --yes
+  - vercel project protection interlock --json
+  - vercel project protection disable interlock --protection-bypass --protection-bypass-secret <redacted> -y
+  - vercel remove dpl_<accidental-production> --yes
+  - vercel remove dpl_<broken-preview> --yes
+Unit tests: 4/4 PASS (runtime config guard).
+Integration tests: health endpoint + protected preview checks PASS.
+E2E tests: 34/34 PASS (Chromium desktop + mobile Chromium; all routes, auth shells, navigation, footer links, mobile drawer, overflow).
+Security checks:
+  - Staged-content secret scan found no credential values or private-key patterns.
+  - .env.local remains ignored and untracked; .env.example contains names only.
+  - Public unauthenticated preview returns 302 to Vercel SSO for / and /api/health.
+  - Vercel project protection JSON: ssoProtection enabled; protectionBypass empty.
+  - No production deployment remains; deployments list contains one Preview deployment.
+Preview URL: https://interlock-ff4vlqtne-uhhh2.vercel.app
+Deployed commit: f8d5260e11475adc81de7b9b2e3ec5ba4c1b417f (deployment dpl_Dt8W3dj3HRzvvtGLQFQTw8EqSNEe)
+External integrations verified:
+  - None in the application. Phase 0 Walrus/Tatum smoke tests remain the only provider calls; no Neon/Groq calls made.
+Reference/UI skill status: four reference images inspected in Phase 0; Phase 1 uses provisional tokens; StageShow skill deferred to Phase 6.
+Known issues:
+  - No Neon database, auth, RLS, provider adapters or decision engine yet.
+  - Operator reports SUI_DEMO_ADDRESS is funded; independent Tatum re-check is required in Phase 3, with a stop at Phase 5 if still zero.
+  - Groq model/structured outputs not yet exercised.
+Blocked work: none.
+Next task: Phase 2 — Neon schema/roles/RLS, Managed Better Auth, membership authorization and tests.
+Authorization boundary: preview only; production remains gated to Phase 9.
+```
+
+### Phase 1 failures, diagnosis and fixes
+
+- Port 3000 was occupied by an unrelated Next.js 14 process. Playwright was moved to isolated port `3127` and `reuseExistingServer` disabled.
+- Playwright's iPhone 13 descriptor selected WebKit; the mobile project was explicitly set to Chromium and the browser was installed.
+- Next dev blocked HMR from `127.0.0.1`; `allowedDevOrigins: ["127.0.0.1"]` was added.
+- Next recommended `data-scroll-behavior="smooth"`; added to the root `<html>` element.
+- Vercel's first deployment was automatically assigned to production because it was the project's first deploy. The production deployment and aliases were removed; a separate `--environment preview` deployment was created.
+- Vercel initially had no framework preset and returned 404. The project was updated to framework `nextjs`, Node `22.x`, and redeployed.
+- `vercel curl` generated a temporary automation bypass secret. It was disabled; the protection configuration now has an empty `protectionBypass`.
+- Prettier reformatted existing Markdown during setup. Those unrelated changes were reverted and `*.md` was added to `.prettierignore`.
+
+### Phase 1 preview verification
+
+- Authenticated CLI requests:
+  - `/api/health` -> `{"status":"ok","service":"interlock","phase":"1","mode":"simulation"}`.
+  - `/dashboard` -> page title `Dashboard · Interlock`.
+- Public requests:
+  - `/` -> `302` to `https://vercel.com/sso-api?...`.
+  - `/api/health` -> `302` to `https://vercel.com/sso-api?...`.
+- Deployment target `preview`; deployment protection includes `vercel_authentication`.
