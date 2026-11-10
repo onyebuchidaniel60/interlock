@@ -9,7 +9,7 @@
 
 ## Current preview
 
-- URL: `https://interlock-835nkre11-uhhh2.vercel.app`
+- URL: `https://interlock-hud4jt7nr-uhhh2.vercel.app`
 - Project: `interlock` under the active Vercel scope.
 - Protection: Vercel Authentication (`ssoProtection: all_except_custom_domains`); public requests return `302` to Vercel SSO.
 - Target: `preview`; no production deployment or custom domain.

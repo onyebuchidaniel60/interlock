@@ -4,7 +4,8 @@ Interlock is a decision audit tool that lets one agent's verified Walrus Memory 
 
 ## Quick Start — Try It Now
 
-**Protected preview:** <https://interlock-835nkre11-uhhh2.vercel.app>  
+**Protected preview:** <https://interlock-hud4jt7nr-uhhh2.vercel.app>
+
 **Access:** Vercel Authentication is enabled. Request access from the operator with the Vercel account email you will use; there are no public demo credentials in this repository.
 
 > **Production URL status (submission blocker):** `https://interlock.vercel.app` is **not this project** — it currently serves an unrelated Vercel app. Interlock production is not deployed because the operator has not provided a production domain under this Vercel project or a separate production Neon project/branch, Managed Auth configuration and backup/rollback path. Do not submit `interlock.vercel.app` as this product's URL until that is resolved.

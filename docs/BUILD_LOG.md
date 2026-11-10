@@ -488,3 +488,12 @@ Tests:
   - security headers verified
 Production: not deployed; no migration; preview secrets not reused.
 ```
+
+## Final submission preview (finalization pass)
+
+- URL: `https://interlock-hud4jt7nr-uhhh2.vercel.app`
+- Deployed source commit: `2a3fad6` (feat: finalize submission-ready build with polished UI and docs)
+- Health: `{"status":"ok","service":"interlock","phase":"9","mode":"simulation"}`
+- Public access: `302` to Vercel SSO; Vercel Authentication enabled; `protectionBypass` empty.
+- Production: blocked. `https://interlock.vercel.app` is an unrelated Vercel app; no production Vercel env or separate production Neon/Walrus/backup inputs exist.
+- Finalization tests: 14 unit, 7 integration, 10 public shell, 6 authenticated, 6 responsive, session tests, live comparison desktop PASS; `npm audit` 0; secret scan clean.
