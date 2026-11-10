@@ -195,3 +195,74 @@ Authorization boundary: preview only; production remains gated to Phase 9.
   - `/` -> `302` to `https://vercel.com/sso-api?...`.
   - `/api/health` -> `302` to `https://vercel.com/sso-api?...`.
 - Deployment target `preview`; deployment protection includes `vercel_authentication`.
+
+## Phase 2 — backend, Neon schema, auth and authorization
+
+```text
+Date/time: 2026-11-10T07:32Z
+Phase: Phase 2 — backend, database, authentication and authorization foundation
+Git commits: 3a8a1b0 (auth/RLS foundation), 14140ca (readiness probe); docs checkpoint follows
+Changes:
+  - Applied db/migrations/001_foundation.sql and 002_member_labels.sql to the preview Neon database through neondb_owner.
+  - Added version-controlled migration runner scripts/migrate.mjs and npm run db:migrate.
+  - Added workspace, member, invitation, agent identity, wallet, observation, memory, job, plan, decision, evidence, execution, audit and idempotency tables.
+  - Added plain PostgreSQL RLS, request-scoped app.user_id, security-definer bootstrap/acceptance functions and least-privilege app_user grants.
+  - Integrated Neon Managed Better Auth through @neon/auth; added /api/auth proxy, src/proxy.ts protection and client/server auth helpers.
+  - Added login, sign-up, workspace creation and one-time invitation flows with OWNER/OPERATOR/OBSERVER membership.
+  - Added /api/readiness for session, membership and app_user RLS proof.
+  - Added RLS integration tests and authenticated Playwright tests.
+  - Added preview Vercel env names DATABASE_URL_APP, NEON_AUTH_BASE_URL, NEON_AUTH_COOKIE_SECRET (values not logged).
+Commands run:
+  - node --env-file=.env.local scripts/migrate.mjs
+  - npm run typecheck
+  - npm run lint
+  - npm test
+  - npm run test:integration
+  - npm run test:e2e -- tests/e2e/shell.spec.ts
+  - E2E_AUTH_STATE=<local-only-state> npm run test:e2e -- tests/e2e/auth.spec.ts
+  - npm run build
+  - vercel env add DATABASE_URL_APP preview
+  - vercel env add NEON_AUTH_BASE_URL preview
+  - vercel env add NEON_AUTH_COOKIE_SECRET preview
+  - vercel deploy --environment preview --yes
+  - vercel project protection ... (temporary automation bypass disabled after verification)
+Unit tests: 4/4 PASS.
+Integration tests: 3/3 PASS (roles, RLS, cross-tenant denial, missing-context denial).
+E2E tests: 10/10 public/protection PASS; 4/4 authenticated PASS with local storage state.
+Security checks:
+  - app_user current_user verified; rolbypassrls=false.
+  - Direct workspace insert and cross-tenant wallet insert denied with PostgreSQL 42501.
+  - No request identity -> zero workspaces visible.
+  - Auth proxy validates browser Origin against exact app origins before forwarding; upstream sees the auth server origin.
+  - No secrets in client bundles, docs or logs; .env.local untracked.
+  - Preview public /api/health returns 302 to Vercel SSO; protectionBypass empty after verification.
+Preview URL: https://interlock-8t77zyu5r-uhhh2.vercel.app
+Deployed commit: 14140ca (preview)
+External integrations verified:
+  - Neon preview database and Managed Better Auth: PASS.
+  - Walrus/Tatum application adapters: not built yet; Phase 3.
+Reference/UI skill status: unchanged; StageShow at Phase 6.
+Known issues:
+  - Tatum demo address must be independently re-verified in Phase 3; stop if zero.
+  - Provider adapters and decision pipeline not built.
+Blocked work: none.
+Next task: Phase 3 — Tatum/Walrus/Groq adapters, canonical memory, deterministic Sentinel and Runner clearance.
+Authorization boundary: preview only; production gated to Phase 9.
+```
+
+### Phase 2 failures, diagnosis and fixes
+
+- Neon Auth returned `INVALID_ORIGIN` for server-action calls from the app origin. Built `/api/auth/[...path]` as an origin-validating proxy that forwards with the auth server's own origin; browser auth forms now use the documented client SDK.
+- Server-action sign-out did not clear the upstream session. Sign-out moved to the client auth proxy.
+- Invite links used `APP_BASE_URL` and pointed at the wrong local port. Links now derive from trusted request headers.
+- Sign-up initially lost the invitation token. Login now preserves the validated `/setup?token=...` target.
+- RLS tests aborted after expected permission errors; added savepoints around negative cases.
+- Auth E2E repeated sign-in per test and was flaky under dev-server load. It now uses a Playwright storage state and serial desktop coverage.
+- A cold settings query can take several seconds; the authenticated test wait was raised to 20 seconds.
+
+### Phase 2 preview verification
+
+- `/api/health` -> `{"status":"ok","service":"interlock","phase":"2","mode":"simulation"}`.
+- `/api/auth/sign-up/email` through the preview proxy returned a Better Auth user token for a synthetic test account.
+- Public `/api/health` -> `302` to Vercel SSO.
+- Vercel project protection: `ssoProtection` enabled, `protectionBypass: {}`.

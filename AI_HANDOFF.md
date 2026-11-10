@@ -3,154 +3,119 @@
 ## Current status
 
 - Product: **Interlock** — one agent's verified memory can prevent another agent from executing a policy-violating action.
-- Implementation phase: **Phase 1 complete — protected preview shell deployed.**
-- Application implementation: **Phase 1 scaffold + placeholder UI only.** No database, auth, provider adapter, decision engine, Runner simulation or demo exists.
+- Implementation phase: **Phase 2 complete — auth, Neon schema, RLS and workspace membership deployed.**
+- Application: protected operations console with real authentication and workspace access.
 - Repository: **CONFIRMED** — `https://github.com/onyebuchidaniel60/interlock`, branch `main`.
-- Phase 0 commit: `dbb87f2ebd993aa475986601a09506a56b138a11` (`docs: complete interlock operator readiness`).
-- Phase 1 code commit: `f8d5260e11475adc81de7b9b2e3ec5ba4c1b417f` (`feat: establish app shell and protected preview`).
-- Preview URL: **https://interlock-ff4vlqtne-uhhh2.vercel.app**
-- Vercel deployment ID: `dpl_Dt8W3dj3HRzvvtGLQFQTw8EqSNEe`
-- Deployed source commit: **`f8d5260e11475adc81de7b9b2e3ec5ba4c1b417f`**
-- Deployment target: **preview**; production deployment removed; no custom domain.
-- Preview protection: **Vercel Authentication** (`ssoProtection: all_except_custom_domains`). Public curl receives `302` to Vercel SSO. Automation bypass secret removed after verification.
-- Vercel project settings: framework `nextjs`, Node `22.x`.
-- Reference UI images: four original WebP images inspected; inventory in `REFERENCE_ASSETS.md`.
-- Walrus Memory mainnet: **Phase 0 signed write/read smoke test PASS**; application adapter pending Phase 3.
-- Tatum Sui mainnet gRPC: **Phase 0 method/auth PASS**; operator reports the demo address is now funded; independent re-verification scheduled for Phase 3.
-- Neon Postgres + Managed Better Auth: **not connected yet**; Phase 2.
-- Groq Analyst: **not called yet**; Phase 3.
-- Production authorization: **bounded Phase 9 release only**; production deployment currently absent by design.
+- Phase 0 commit: `dbb87f2ebd993aa475986601a09506a56b138a11`.
+- Phase 1 commit: `f8d5260e11475adc81de7b9b2e3ec5ba4c1b417f`.
+- Phase 2 commits: `3a8a1b0` (`feat: implement workspace auth and isolated data model`), `14140ca` (`feat: expose verified readiness probe`).
+- Preview URL: **https://interlock-8t77zyu5r-uhhh2.vercel.app**
+- Deployed source commit: **`14140ca`** (deployment target: preview).
+- Preview protection: **Vercel Authentication** (`ssoProtection: all_except_custom_domains`); no automation bypass; public requests return `302` to Vercel SSO.
+- Neon: preview database reachable; application role `app_user` with `NOBYPASSRLS`; migrations applied through `DATABASE_URL_UNPOOLED` (`neondb_owner`) only.
+- Managed Better Auth: connected; sign-up/sign-in/sign-out, server sessions, invite links and member roles work.
+- Walrus Memory mainnet: Phase 0 signed write/read smoke test passed; application adapter pending Phase 3.
+- Tatum Sui mainnet gRPC: Phase 0 method/auth passed; operator reports the demo address is funded. **Re-verify independently at Phase 3.** If zero at Phase 5, stop.
+- Groq Analyst: not called yet; Phase 3.
+- Production authorization: bounded Phase 9 release only; no production deployment or migration.
 - Budget: **$0 unapproved spend; free tiers only.**
-- Demo video: **not produced.** Kokoro TTS primary, Piper fallback.
+- Demo video: not produced; Kokoro TTS primary, Piper fallback.
 
-## Phase 1 delivered
+## Phase 2 delivered
 
-- Next.js 16.4.6 App Router, React 19.3.1, strict TypeScript, Tailwind CSS 4.3.5, Lucide icons.
-- Responsive dark operations shell with desktop sidebar and mobile drawer.
-- Routes:
-  - `/login`, `/setup`
-  - `/dashboard`, `/observations`, `/memory`, `/plans`, `/plans/new`, `/plans/[id]`
-  - `/decisions/[id]`, `/audit`, `/agents`, `/settings`, `/demo`
-  - `/api/health`
-  - `/`, `not-found`, `error`, `loading`
-- Reusable `PageHeader`, `KpiCard`, `Badge`, `StatusRow`, `EmptyState`, `AgentCard`, `PlaceholderPanel`, `ButtonLink`, `AuthShell` components.
-- Runtime safety guard in `src/lib/config.ts`: rejects non-simulation execution mode and production demo baseline.
-- Every unfinished area is labelled with its phase; no fake memories, verdicts, provider responses or form submits.
-- Footer links to the real public GitHub README and repository; Documentation destination approved.
-- `.env.example` committed with names only; `.env.local` ignored.
-- `README.md` now has local commands and the preview URL.
+### Database
 
-## Phase 1 verification evidence
+- `db/migrations/001_foundation.sql` and `002_member_labels.sql` applied to the preview Neon database.
+- Versioned migration runner: `scripts/migrate.mjs`; `npm run db:migrate`.
+- Tables: `workspaces`, `workspace_members`, `workspace_invitations`, `agent_identities`, `wallet_sources`, `chain_observations`, `memory_entries`, `memory_write_jobs`, `action_plans`, `decision_records`, `decision_evidence`, `execution_records`, `audit_events`, `idempotency_records`, `schema_migrations`.
+- Constraints: role/status/type checks, positive integer MIST/bps checks, one active owner per workspace, one active workspace per user, unique invitation token hash, unique blob per workspace, unique decision/execution bindings.
+- Indexes for candidate memory filtering, tenant reads, audit, idempotency expiry and retry scheduling.
+- Immutable-ish grants: updates/deletes revoked on observations, evidence, executions, audit; deletes revoked on plans, memories, decisions, memberships and invitations.
+
+### Roles, RLS and functions
+
+- Application queries use `DATABASE_URL_APP` as `app_user`; startup asserts `current_user=app_user` and `rolbypassrls=false`.
+- `withUser()` begins a transaction, sets `app.user_id` with `set_config(..., true)`, and releases the connection after commit/rollback.
+- Plain PostgreSQL RLS on every tenant-owned table; no `auth.uid()`.
+- Helpers: `app_current_user_id()`, `app_is_workspace_member(uuid)`, `app_workspace_role(uuid)`, `app_get_invitation(token_hash)`.
+- Security-definer functions: `app_create_workspace(name, slug, user_id)` (creates owner membership + four agent identities + audit), `app_accept_invitation(token_hash, user_id, email)` (validates token/email/expiry, inserts active membership + audit).
+- Direct workspace insert denied; cross-tenant reads and writes denied; missing `app.user_id` yields zero visible workspaces.
+
+### Authentication and membership
+
+- Neon Managed Better Auth via `@neon/auth/next/server` and `@neon/auth/next`; `@supabase/ssr` absent.
+- `/api/auth/[...path]` proxies to Neon Auth. The route validates the browser `Origin` against an exact app allowlist and presents the auth server's own origin upstream.
+- `src/proxy.ts` protects all app routes; `/login`, `/setup`, `/api/health` are public.
+- `/login` has a real email/password form; `/setup` handles sign-up, workspace creation and invitation acceptance.
+- Owner can create a one-time invitation link (7-day expiry); link is shown once through a short-lived httpOnly cookie, token hash stored in the DB.
+- Roles: OWNER, OPERATOR, OBSERVER; member labels/email denormalized for the settings view.
+- Sidebar shows real workspace, role, user and a working client-side sign-out through the auth proxy.
+- `/api/readiness` returns session/membership/app_user-RLS status for authenticated members; no secrets.
+
+## Verification evidence
 
 - `npm run typecheck` — **PASS**.
 - `npm run lint` — **PASS**.
 - `npm test` — **4/4 PASS** (runtime config guard).
-- `npm run build` — **PASS** (Next.js production build, 14 static/dynamic routes).
-- `npm run test:e2e` — **34/34 PASS** across Chromium desktop + mobile Chromium:
-  - every route returns 200 and renders its h1
-  - no `href="#"` dead links
-  - login/setup accessible auth shells
-  - `/api/health` safe payload
-  - primary navigation and `aria-current`
-  - real footer destinations
-  - mobile drawer open/navigate/close
-  - no horizontal overflow on primary routes
-- Preview `/api/health` via authenticated Vercel CLI: `{"status":"ok","service":"interlock","phase":"1","mode":"simulation"}`.
-- Preview `/dashboard` via authenticated Vercel CLI: `<title>Dashboard · Interlock</title>`.
-- Public preview access: `302` to `https://vercel.com/sso-api?...` for `/` and `/api/health`, confirming protection.
-- Vercel project protection JSON: `ssoProtection` enabled, `protectionBypass: {}`.
-- Vercel deployments list: one `Preview` deployment only; accidental first production deployment removed.
+- `npm run test:integration` — **3/3 PASS**:
+  - application connection is `app_user` with `bypassrls=false`
+  - workspace bootstrap creates one owner + four agents
+  - cross-tenant workspace read is invisible
+  - direct workspace insert denied (`42501`)
+  - cross-tenant wallet insert denied (`42501`)
+  - no request identity yields zero visible workspaces
+- `npm run test:e2e -- tests/e2e/shell.spec.ts` — **10/10 PASS** (public shell, auth redirects, health, mobile overflow).
+- `npm run test:e2e -- tests/e2e/auth.spec.ts` with a real storage state — **4/4 PASS**:
+  - real workspace + OWNER role
+  - members list and owner-only invite control
+  - navigation with a real session
+  - `/api/readiness` proves session, membership and `app_user_rls`
+- `npm run build` — **PASS**; 14 app routes plus proxy and auth/readiness APIs.
+- Preview `/api/health` via authenticated CLI: `{"status":"ok","service":"interlock","phase":"2","mode":"simulation"}`.
+- Preview `/api/auth/sign-up/email` via the proxy returned a Better Auth user token (synthetic test account), proving deployed auth wiring.
+- Public preview `/api/health` → `302` to Vercel SSO.
+- Migration runner verified `current_user=neondb_owner` before applying; application role verified `app_user`.
 
-## Phase 1 issues and fixes
+## Phase 2 issues and fixes
 
-- Port 3000 was already occupied by an unrelated Next 14 process. Playwright uses isolated port `3127`; no interference.
-- Playwright's iPhone descriptor defaults to WebKit. The mobile project explicitly uses Chromium; browser install and tests pass.
-- Next dev blocked HMR from `127.0.0.1`. Added `allowedDevOrigins: ["127.0.0.1"]`.
-- Next recommended `data-scroll-behavior="smooth"`; added to `<html>`.
-- Vercel's first deployment auto-targeted production. Removed that deployment and created an explicit `--environment preview` deployment; only preview remains.
-- Vercel initially had no framework preset and served 404. Set framework `nextjs` and Node `22.x`, then redeployed.
-- `vercel curl` created an automation bypass secret. It was disabled; `protectionBypass` is now empty.
-- Prettier reformatted existing Markdown during setup. Those unrelated changes were reverted; `*.md` is now excluded from Prettier.
+- Neon Auth rejected app-origin requests (`INVALID_ORIGIN`) because it only trusted its own origin/localhost. Added an allowlisted server proxy that validates the browser origin then presents the auth server origin upstream. This prevents arbitrary-origin auth calls while enabling preview auth.
+- Server-action sign-out used the app origin and failed. Moved sign-out to the client auth proxy.
+- Invite link initially used `APP_BASE_URL` (localhost:3000) and pointed at the wrong port in local tests. It now derives the origin from trusted request headers.
+- Sign-up via server actions could not set/refresh the cross-origin auth cookies reliably. Auth forms now use the documented client SDK through the proxied `/api/auth` route.
+- First sign-up redirect lost the invitation token. Login now preserves a validated `/setup?token=...` target.
+- RLS integration test needed savepoints after expected `42501` failures to avoid aborting the transaction; fixed.
+- Auth E2E initially signed in for every test and hit timing/rate pressure. It now uses a Playwright storage state (`E2E_AUTH_STATE`) and serial desktop coverage.
+- Settings page can take several seconds on a cold Neon connection; its E2E wait is 20 seconds.
 
-## Product-critical invariants
+## Next task — Phase 3
 
-1. Walrus Memory mainnet must be core functionality, not decoration.
-2. Same immutable plan hash and observation must be used for memory-off baseline and memory-on protected comparison.
-3. Memory OFF baseline exists only in local/test/protected preview and only as a simulation; startup must fail if enabled in production.
-4. Normal production decision path is fail-closed. Missing policy/evidence, incomplete semantic recall, stale or conflicting evidence => HOLD.
-5. Sentinel is deterministic; an LLM cannot approve/reject.
-6. Runner accepts only final APPROVE with signed, 60-second, workspace/plan/decision-bound, single-use clearance.
-7. All execution is simulated; no wallet custody/signing, trades or transfers.
-8. Final APPROVE requires a completed, verified Walrus VERDICT memory.
-9. Postgres metadata alone is never decision evidence; recall content and provenance must be verified.
-10. Production startup must fail unless `INTERLOCK_EXECUTION_MODE=simulation` and `INTERLOCK_DEMO_BASELINE_ENABLED=false`.
+Implement the core domain and provider adapters:
 
-## Architecture changes authorized in Phase 0
-
-1. **Supabase → Neon (Lakebase Postgres + Managed Better Auth).**
-   - `DATABASE_URL_UNPOOLED` (role `neondb_owner`) is migrations only.
-   - `DATABASE_URL_APP` (role `app_user`, `NOBYPASSRLS`) is all application queries.
-   - Verify `SELECT current_user` is `app_user`; never run app queries as `neondb_owner`.
-   - Auth via `NEON_AUTH_BASE_URL` + `NEON_AUTH_COOKIE_SECRET`; `@neon/auth/next/server`; `@supabase/ssr` removed.
-   - RLS is plain PostgreSQL; `auth.uid()` is unavailable. Use request-scoped `app.user_id` plus `workspace_members`.
-2. **OpenAI → Groq for Analyst.**
-   - `https://api.groq.com/openai/v1`; `GROQ_API_KEY` server-only.
-   - Model `qwen/qwen3.8-27b`; strict JSON schema (`additionalProperties: false`, all properties required).
-   - Analyst has no policy authority; Sentinel remains deterministic.
-
-## Phase 0 provider evidence
-
-- Walrus: signed synthetic FACT write → terminal success → blob `nOgMyB2p1dHhQT_HwSf6MPsWoGScPXMIStHJdlbnlR8` → metadata → exact recall → SHA-256/namespace/author verified. Namespace `interlock`; SDK `@mysten-incubation/memwal@0.1.14`.
-- Tatum: `StateService.GetBalance` succeeded through `sui-mainnet-grpc.gateway.tatum.io:443` with official Sui protos pinned at `79485a8328e2f58fa047e4ce1327704b412e958a`. Phase 0 returned `balance="0"` and no checkpoint/finality fields; the operator reports the address is funded now. Re-verify independently in Phase 3; stop at Phase 5 if it is still zero.
-
-## Next task — Phase 2
-
-Implement the backend, database, authentication and authorization foundation exactly as specified in `IMPLEMENTATION_PLAN.md`:
-
-1. Create/verify the Neon preview project or branch and connection roles; never expose the migration URL to the app.
-2. Add version-controlled migrations for workspaces, memberships, agent identities, wallet sources, observations, memories/jobs, plans, decisions/evidence, executions, audit and idempotency.
-3. Enable plain PostgreSQL RLS on every tenant-owned table; request-scoped `app.user_id`; no `auth.uid()`.
-4. Verify `SELECT current_user=app_user`, `NOBYPASSRLS`, table ownership, and cross-workspace denial.
-5. Integrate Neon Managed Better Auth (`@neon/auth/next/server`) with invite-only workspace access and server-verified membership.
-6. Add server-side role/membership guards and protect every app route; replace the Phase 1 placeholder login/setup behavior.
-7. Add health/readiness checks for database and auth without leaking secrets.
-8. Add migration, RLS matrix, auth/session, role and cross-tenant IDOR tests.
-9. Update `AI_HANDOFF.md`, `docs/BUILD_LOG.md`, and preview at the Phase 2 checkpoint; commit and continue.
+1. Tatum gRPC adapter using the exact verified `StateService.GetBalance` method, official pinned protos, integer MIST strings, no fabricated checkpoint/finality fields. **Independently re-verify `SUI_DEMO_ADDRESS` is non-zero. If zero, stop and report.**
+2. Walrus Memory adapter using role-scoped delegate keys, namespace `interlock`, `remember`/`waitForRememberJob`, metadata listing, recall and content/hash/author verification.
+3. Canonical JSON/hash utilities and Zod schemas for FACT, CONSTRAINT, VERDICT, OUTCOME.
+4. Memory write lifecycle and `memory_entries`/`memory_write_jobs` persistence; active only after verified recall.
+5. Groq Analyst adapter with strict JSON schema and deterministic fallback; zero policy authority.
+6. Deterministic candidate query + Sentinel evaluator + final VERDICT memory requirement.
+7. Runner signed, short-lived, single-use simulation clearance.
+8. API contracts, idempotency and failure handling.
+9. Tests: adapter contract tests, 10%/15% decision scenario, missing/stale/conflict HOLD, clearance replay/concurrency.
+10. Update AI_HANDOFF/BUILD_LOG, commit `feat: implement core decision pipeline`, deploy preview, continue.
 
 ## Authorization boundaries
 
-- **Preview:** Vercel project `interlock`, Vercel Authentication, preview only, generated `*.vercel.app`, no custom domain. Preview URL is protected.
-- **Production after Phase 9:** create Vercel production deployment; apply version-controlled Neon migrations after a verified backup/rollback path; separate Neon project/branch and `interlock-prod` Walrus namespace; no preview secrets; no DNS changes; no public marketing; no production data import; flags enforced.
-- **Never:** private keys/seed phrases, wallet custody/signing, real transactions/transfers/trades, bypassing auth/RLS/provider scopes, exposing secrets in client bundles/logs/docs, committing `.env` files, unapproved spend.
-- **Data:** public Sui address + synthetic data only. No customer or production data.
-- **Demo:** hackathon judges; `demo/` output only; no public upload; redact secrets/private URLs/emails/account IDs; truncate wallet addresses if requested.
+- Preview only; production gated to Phase 9.
+- No private keys/seed phrases; Tatum public address only; Runner simulation only.
+- No real transactions, transfers, trades or custody.
+- Secrets server-only; `.env.local` ignored; preview env contains only preview values.
+- No production DB migration until a verified backup/rollback path exists.
+- No DNS, public marketing or production data import.
 
-## Known open issues / blockers
+## Known open issues
 
-1. **Phase 2 work is next:** no Neon connection, schema, RLS, auth or workspace membership exists yet.
-2. **Tatum demo funding:** operator reports funded; independent re-verification required in Phase 3. Stop at Phase 5 if zero.
-3. **Groq** model/structured output not yet exercised; free-tier cap required.
-4. **Provider adapters** not built; preview is a shell, not a working decision product.
-5. **Final UI** is intentionally provisional; reference-led refinement is Phase 6.
-6. **Demo video/TTS** not produced.
-
-## Checkpoint template
-
-```text
-Current phase:
-Completed:
-Tests and evidence:
-Preview/staging URL:
-Deployed commit:
-Reference image and UI skill status:
-Documentation status:
-Demo video status:
-Known issues:
-Authorization boundaries:
-Next task:
-Blocked by (if any):
-```
-
-## Do not claim
-
-Do not claim that database/auth, Walrus/Tatum/Groq application integration, Sentinel decisions, Runner simulation or the demo video exist until produced and verified. The preview is a Phase 1 shell with labelled placeholders.
+1. Tatum funded-balance re-check is required in Phase 3 (stop if zero).
+2. Provider adapters and decision pipeline are not implemented yet.
+3. Groq has not been called.
+4. Final reference-led UI is Phase 6.
+5. Demo video/TTS is Phase 8.
+6. No production deployment/migration.
