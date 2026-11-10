@@ -33,4 +33,15 @@ test.describe("authenticated workspace", () => {
     await expect(page).toHaveURL(/\/memory$/);
     await expect(page.getByRole("heading", { level: 1, name: "Memory ledger" })).toBeVisible();
   });
+
+  test("readiness proves session, membership and app_user RLS", async ({ request }) => {
+    const response = await request.get("/api/readiness");
+    expect(response.status()).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({
+      status: "ok",
+      auth: "session_verified",
+      database: "app_user_rls",
+      workspace: "verified_membership",
+    });
+  });
 });
