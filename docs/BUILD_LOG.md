@@ -316,3 +316,43 @@ Authorization boundary: preview only; production gated to Phase 9.
 - Route error boundary incorrectly rendered nested `<html>`/`<body>`; split route error and global error components.
 - Dev-only Suspense streaming produced an empty dashboard; production build rendered correctly. Playwright now tests a production build, matching Vercel.
 - Auth test navigation depended on an empty-state link that disappears once data exists; switched to the persistent primary navigation.
+
+## Phase 5 — end-to-end safety and demo comparison
+
+```text
+Date/time: 2026-11-10T08:13Z
+Phase: Phase 5 — E2E functionality completion and verification
+Git commit: d141f0c (test: verify interlock end-to-end safety flows)
+Changes:
+  - Added preview-only createDemoComparison service and /demo comparison UI.
+  - Same immutable plan hash and observation power both branches.
+  - Baseline is explicitly WOULD PASS and illustrative; it creates no decision/clearance.
+  - Protected branch writes real FACT/CONSTRAINT/VERDICT memories and shows verified citations.
+  - Added gated live-demo Playwright test; desktop pass, mobile skip for provider mutation.
+  - Confirmed rejection cannot reach simulation.
+  - Playwright now runs against a production build rather than the dev-only Suspense path.
+Commands run:
+  - npm run typecheck; npm run lint; npm test (14)
+  - npm run build
+  - E2E_AUTH_STATE=<local> E2E_LIVE_DEMO=1 npm run test:e2e -- tests/e2e/live-demo.spec.ts
+  - E2E_AUTH_STATE=<local> npm run test:e2e -- tests/e2e/auth.spec.ts (6)
+  - npm run test:e2e -- tests/e2e/shell.spec.ts (10)
+  - vercel deploy --environment preview
+Unit tests: 14/14 PASS.
+Integration tests: live pipeline 6/6 PASS (from Phase 3/4 evidence).
+E2E tests: live Memory OFF/ON comparison PASS desktop; public shell 10/10; authenticated live-data 6/6.
+Security checks:
+  - Baseline cannot enable in production; startup guard retained.
+  - Rejected decisions have no simulation control; replay blocked.
+  - Server actions re-check session membership/role.
+Preview URL: https://interlock-cm133bp8u-uhhh2.vercel.app
+Deployed commit: d141f0c
+External integrations verified:
+  - Real Tatum observation + Walrus FACT/CONSTRAINT/VERDICT for the comparison.
+Reference/UI skill status: StageShow attempt moves to Phase 6.
+Known issues:
+  - Provisional visual system; final reference-led pass is Phase 6.
+Blocked work: none.
+Next task: Phase 6 — reference-led UI and StageShow skill.
+Authorization boundary: preview only; production gated to Phase 9.
+```

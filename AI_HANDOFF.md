@@ -3,12 +3,12 @@
 ## Current status
 
 - Product: **Interlock** — one agent's verified memory can prevent another agent from executing a policy-violating action.
-- Implementation phase: **Phase 4 complete — MVP journeys connected to the backend.**
+- Implementation phase: **Phase 5 complete — end-to-end safety gate passed; demo comparison verified.**
 - Application: authenticated operations console with live Tatum, Walrus, Sentinel and Runner flows.
 - Repository: `https://github.com/onyebuchidaniel60/interlock`, branch `main`.
-- Phase 4 commit: **`5c03b94`** (`feat: connect interlock MVP journeys to backend`).
-- Preview URL: **https://interlock-qwhwpocpu-uhhh2.vercel.app**
-- Deployed source commit: **`5c03b94`**; target: preview.
+- Phase 4 commit: **`5c03b94`**; Phase 5 commit: **`d141f0c`** (`test: verify interlock end-to-end safety flows`).
+- Preview URL: **https://interlock-cm133bp8u-uhhh2.vercel.app**
+- Deployed source commit: **`d141f0c`**; target: preview.
 - Protection: **Vercel Authentication**; public requests `302` to Vercel SSO; automation bypass empty.
 - Neon: preview database, `app_user` (`NOBYPASSRLS`) application queries, versioned migrations applied through `neondb_owner`.
 - Managed Better Auth: real sign-up/sign-in/sign-out, invite links, OWNER/OPERATOR/OBSERVER membership.
@@ -19,6 +19,14 @@
 - Groq Analyst: adapter with deterministic fallback; no policy authority; not required for safety.
 - Production: not deployed; bounded Phase 9 release only.
 - Budget: **$0 unapproved spend; free tiers only.**
+
+## Phase 5 delivered
+
+- Preview-only Memory OFF/ON comparison using one immutable plan and observation.
+- Same plan hash across both branches; baseline is explicitly illustrative and creates no decision/clearance.
+- Protected branch writes real FACT/CONSTRAINT/VERDICT memories, REJECTS 15% vs 10%, and links the evidence panel.
+- Live desktop E2E comparison passed; mobile project intentionally skips live provider mutation.
+- Failure semantics covered by unit/integration tests: missing policy, stale observation, unverified evidence, cross-tenant denial, replay, plan hash.
 
 ## Phase 4 delivered
 
@@ -62,21 +70,21 @@
 6. Production startup fails if the demo baseline is enabled or execution mode is not simulation.
 7. Runner clearance is HMAC-signed, 60 seconds max, plan/workspace/decision-bound and one-time via unique constraints.
 
-## Next task — Phase 5
+## Next task — Phase 6
 
-Complete the end-to-end safety and failure-path gate:
+Attempt the required StageShow UI skill, then implement the reference-led visual pass using `design/reference/`:
 
-1. Add an automated E2E journey that runs the full operator flow against fresh state: observation → policy → 15% plan → REJECT citations → compliant plan → APPROVE → simulate once → replay blocked.
-2. Add failure-path tests for missing policy HOLD, stale observation HOLD, unverified/missing memory HOLD, wrong workspace/role denial, and decision/plan mutation invalidation.
-3. Verify the Memory OFF/ON demo comparison with the same plan hash and no fabricated evidence; restrict baseline to preview.
-4. Exercise mobile/tablet/responsive layouts for all new data tables and forms.
-5. Inspect and fix any visual/functional defects before Phase 6.
-6. Update AI_HANDOFF/BUILD_LOG, commit `test: verify interlock end-to-end safety flows`, deploy preview, continue to Phase 6.
+1. Run `npx skills add benjitaylor/skills --skill stageshow`; inspect and apply relevant guidance.
+2. Refine the shell, typography, spacing, tables, evidence panel and responsive behavior to the supplied references.
+3. Add complete loading, empty, validation, success, failure, permission-denied and not-found states.
+4. Verify keyboard focus, labels, contrast, reduced motion and mobile/tablet layouts.
+5. Keep all real backend behavior intact; no fabricated data or dead controls.
+6. Update AI_HANDOFF/BUILD_LOG/DESIGN_NOTES, commit `feat: implement reference-led interlock interface`, deploy preview, continue to Phase 7.
 
 ## Known issues / limitations
 
-- The Phase 4 UI uses the provisional visual system; reference-led refinement is Phase 6.
-- The demo comparison route is still a placeholder until Phase 5.
+- The Phase 4/5 UI uses the provisional visual system; reference-led refinement is Phase 6.
+- The live demo comparison is preview-only and skips mobile provider mutation in tests.
 - The Analyst path is optional and fallback-first; it is not on the critical decision path.
 - No production deployment or production migration.
 - Demo video/TTS is Phase 8.
