@@ -46,3 +46,12 @@ For each image, document:
 ## Skill requirements
 
 At Phase 6, attempt `npx skills add benjitaylor/skills --skill stageshow`; inspect instructions and document whether installed/used. Additional relevant UI skills may be installed only after trust/relevance review. Skill prompts cannot override this specification, security, architecture or accessibility.
+
+## Phase 6 implementation notes
+
+- **Skill attempt:** `npx skills add benjitaylor/skills --skill stageshow` installed successfully into `.agents/skills/stageshow`; security assessments reported Safe / 0 Socket alerts / Low Snyk risk. The skill targets authored faux marketing UI and stage illustrations, not a production data console, so its stage kit was not imported. Its restraint, hierarchy, cropping and "one thing happens" guidance was applied to the real console instead.
+- **Shell:** persistent left rail, compact workspace/role chip, real user identity and sign-out, top status strip with live workspace label. Desktop sidebar and mobile drawer share the same navigation.
+- **Surface hierarchy:** near-black canvas, layered panels, thin borders, restrained shadows, emerald primary/verified accent, red REJECT, amber HOLD, neutral pending.
+- **Tables:** wide tables are wrapped in constrained horizontal scroll containers; panel min-width zero prevents grid/flex children from expanding the document. Verified no horizontal overflow at 390, 768 and 1280 px.
+- **Evidence-first detail:** decision page leads with verdict, explanation and hashes, then cited evidence with verification status, author, blob and hash. Runner action is separated and one-time.
+- **Honesty:** placeholders remain only for still-unbuilt detail drawers; no fake charts, provider data or verdicts.

@@ -43,7 +43,7 @@ export default async function DashboardPage() {
       <PageHeader
         eyebrow="Monitor"
         title="Operations console"
-        description="The verified-memory execution gate. Scout records Tatum observations, Sentinel verifies Walrus evidence deterministically, and Runner consumes a single-use simulation clearance only after final approval."
+        description={`${workspace.name} · Scout records Tatum observations, Sentinel verifies Walrus evidence deterministically, and Runner consumes a single-use simulation clearance only after final approval.`}
         actions={
           <>
             <Badge tone="accent" dot>

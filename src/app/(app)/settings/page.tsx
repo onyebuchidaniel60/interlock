@@ -102,7 +102,7 @@ export default async function SettingsPage({
               {members.length}
             </Badge>
           </div>
-          <div className="mt-4 overflow-x-auto">
+          <div className="mt-4 w-full min-w-0 max-w-full overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="border-b border-line text-[10px] uppercase tracking-[0.14em] text-faint">
                 <tr>
@@ -265,7 +265,7 @@ export default async function SettingsPage({
                     return (
                       <li key={constraint.id} className="border-b border-line pb-2 last:border-b-0 last:pb-0">
                         <p className="text-xs font-semibold text-ink">MAX_EXPOSURE_BPS · {bps === null ? "unknown" : formatBps(bps)}</p>
-                        <p className="mt-1 font-mono text-[10px] text-faint">{constraint.scope}</p>
+                        <p className="mt-1 break-all font-mono text-[10px] text-faint">{constraint.scope}</p>
                         <p className="mt-1 font-mono text-[10px] text-muted">{shortId(constraint.walrus_blob_id, 20)}</p>
                         <p className="mt-1 text-[10px] text-faint">verified {formatDate(constraint.verified_at)}</p>
                       </li>

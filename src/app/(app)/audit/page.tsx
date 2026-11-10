@@ -39,8 +39,8 @@ export default async function AuditPage() {
         </section>
       ) : (
         <section className="surface overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] text-left text-xs">
+          <div className="w-full min-w-0 max-w-full overflow-x-auto">
+            <table className="w-full text-left text-xs">
               <thead className="border-b border-line bg-white/[0.015] text-[10px] uppercase tracking-[0.14em] text-faint">
                 <tr>
                   <th className="px-5 py-3 font-semibold">Event</th>

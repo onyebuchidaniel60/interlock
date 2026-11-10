@@ -138,8 +138,8 @@ export default async function ObservationsPage({
             />
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-left text-xs">
+          <div className="w-full min-w-0 max-w-full overflow-x-auto">
+            <table className="w-full text-left text-xs">
               <thead className="border-b border-line bg-white/[0.015] text-[10px] uppercase tracking-[0.14em] text-faint">
                 <tr>
                   <th className="px-5 py-3 font-semibold">Address</th>
@@ -202,7 +202,7 @@ export default async function ObservationsPage({
                 <div key={constraint.id} className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
                   <div>
                     <p className="text-xs font-medium text-ink">MAX_EXPOSURE_BPS · {bps === null ? "unknown" : formatBps(bps)}</p>
-                    <p className="mt-1 font-mono text-[10px] text-faint">{constraint.scope} · {shortId(constraint.walrus_blob_id, 16)}</p>
+                    <p className="mt-1 break-all font-mono text-[10px] text-faint">{constraint.scope} · {shortId(constraint.walrus_blob_id, 16)}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge tone="accent" dot>

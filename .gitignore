@@ -38,3 +38,6 @@ yarn-debug.log*
 *.sqlite
 *.sqlite3
 *.db
+
+.agents/
+skills-lock.json

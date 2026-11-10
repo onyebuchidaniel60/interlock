@@ -119,8 +119,8 @@ export default async function DecisionDetailPage({
                 No evidence rows were stored. The decision is fail-closed.
               </p>
             ) : (
-              <div className="mt-3 overflow-x-auto">
-                <table className="w-full min-w-[760px] text-left text-xs">
+              <div className="mt-3 w-full min-w-0 max-w-full overflow-x-auto">
+                <table className="w-full text-left text-xs">
                   <thead className="border-b border-line text-[10px] uppercase tracking-[0.14em] text-faint">
                     <tr>
                       <th className="pb-2 font-semibold">Role</th>
