@@ -266,3 +266,53 @@ Authorization boundary: preview only; production gated to Phase 9.
 - `/api/auth/sign-up/email` through the preview proxy returned a Better Auth user token for a synthetic test account.
 - Public `/api/health` -> `302` to Vercel SSO.
 - Vercel project protection: `ssoProtection` enabled, `protectionBypass: {}`.
+
+## Phase 4 — functional MVP journeys connected
+
+```text
+Date/time: 2026-11-10T08:07Z
+Phase: Phase 4 — functional frontend integration
+Git commit: 5c03b94 (feat: connect interlock MVP journeys to backend)
+Changes:
+  - Connected the operations console to live Neon, Tatum, Walrus, Sentinel and Runner services.
+  - Added real observation, policy, plan, evaluation and simulation forms/actions.
+  - Added live dashboard counts/recent decisions, memory ledger, plan list/detail, decision evidence view and audit history.
+  - Added server-side role checks and maxDuration=60 for provider-bound operations.
+  - Added format/queries helpers and client submit pending states.
+  - Fixed a dashboard query (missing observation join), route error boundary nesting and production/dev rendering validation.
+Commands run:
+  - npm run typecheck
+  - npm run lint
+  - npm test (14 tests)
+  - npm run test:integration (live Tatum/Walrus/RLS/pipeline, 6 tests)
+  - npm run test:e2e -- tests/e2e/shell.spec.ts (10 tests, production build)
+  - E2E_AUTH_STATE=<local state> npm run test:e2e -- tests/e2e/auth.spec.ts (6 tests)
+  - npm run build
+  - vercel deploy --environment preview
+Unit tests: 14/14 PASS.
+Integration tests: 6/6 PASS.
+E2E tests: public shell 10/10 PASS; authenticated live-data journeys 6/6 PASS.
+Security checks:
+  - Server actions derive workspace/role from verified session membership.
+  - RLS remains active; no client verdict/clearance trusted.
+  - Preview protection remains Vercel Authentication; public health 302.
+  - No secrets in docs/client bundles.
+Preview URL: https://interlock-qwhwpocpu-uhhh2.vercel.app
+Deployed commit: 5c03b94
+External integrations verified:
+  - Tatum funded balance observation; Walrus FACT/CONSTRAINT/VERDICT writes and recalls; Runner single simulation and replay block.
+Reference/UI skill status: provisional tokens; StageShow deferred to Phase 6.
+Known issues:
+  - Demo comparison route still placeholder.
+  - Final reference-led visual pass pending.
+Blocked work: none.
+Next task: Phase 5 — end-to-end safety/failure-path gate and demo comparison.
+Authorization boundary: preview only; production gated to Phase 9.
+```
+
+### Phase 4 failures and fixes
+
+- Dashboard initially failed with `column p.address does not exist`; added the missing `chain_observations` join.
+- Route error boundary incorrectly rendered nested `<html>`/`<body>`; split route error and global error components.
+- Dev-only Suspense streaming produced an empty dashboard; production build rendered correctly. Playwright now tests a production build, matching Vercel.
+- Auth test navigation depended on an empty-state link that disappears once data exists; switched to the persistent primary navigation.
