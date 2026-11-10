@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Activity,
   ArrowUpRight,
@@ -12,15 +12,18 @@ import {
   Gauge,
   GitBranch,
   LayoutDashboard,
+  LogOut,
   Menu,
   Settings,
   ShieldCheck,
+  UserRound,
   WalletCards,
   X,
   type LucideIcon,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 
+import { authClient } from "@/lib/auth/client";
 import { Badge } from "@/components/ui";
 import { cn } from "@/lib/utils";
 
@@ -140,7 +143,26 @@ function Navigation({ pathname, onNavigate }: { pathname: string; onNavigate?: (
   );
 }
 
-function SidebarFooter() {
+function SidebarFooter({
+  userName,
+  userEmail,
+  workspaceRole,
+  onSignOut,
+  signingOut,
+}: {
+  userName: string;
+  userEmail: string;
+  workspaceRole: string;
+  onSignOut: () => void;
+  signingOut: boolean;
+}) {
+  const initials = userName
+    .split(/\s+/)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
   return (
     <div className="border-t border-line p-3">
       <div className="rounded-xl border border-line bg-white/[0.02] p-3">
@@ -152,14 +174,64 @@ function SidebarFooter() {
           No custody, signing or transaction submission. Verification is fail-closed.
         </p>
       </div>
-      <p className="px-1 pt-3 text-[10px] text-faint">Interlock · Phase 1 shell</p>
+
+      <div className="mt-3 rounded-xl border border-line bg-white/[0.02] p-3">
+        <div className="flex items-center gap-2">
+          <span className="grid size-8 shrink-0 place-items-center rounded-full border border-accent/25 bg-accent/10 text-[10px] font-bold text-accent">
+            {initials || <UserRound className="size-3.5" aria-hidden="true" />}
+          </span>
+          <div className="min-w-0">
+            <p className="truncate text-[11px] font-semibold text-ink">{userName}</p>
+            <p className="truncate text-[10px] text-faint">{userEmail}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onSignOut}
+            disabled={signingOut}
+            className="ml-auto grid size-7 place-items-center rounded-md border border-line text-faint hover:bg-white/[0.05] hover:text-ink disabled:opacity-50"
+            aria-label="Sign out"
+            title="Sign out"
+          >
+            <LogOut className="size-3.5" aria-hidden="true" />
+          </button>
+        </div>
+        <p className="mt-2 text-[10px] text-faint">
+          Role: <span className="font-semibold text-muted">{workspaceRole}</span>
+        </p>
+      </div>
+      <p className="px-1 pt-3 text-[10px] text-faint">Interlock · Phase 2 auth</p>
     </div>
   );
 }
 
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({
+  children,
+  workspaceName,
+  workspaceRole,
+  userName,
+  userEmail,
+}: {
+  children: ReactNode;
+  workspaceName: string;
+  workspaceRole: string;
+  userName: string;
+  userEmail: string;
+}) {
   const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
+
+  async function handleSignOut() {
+    setSigningOut(true);
+    try {
+      await authClient.signOut();
+      router.push("/login");
+      router.refresh();
+    } finally {
+      setSigningOut(false);
+    }
+  }
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -189,13 +261,23 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className="mt-4 rounded-lg border border-line bg-white/[0.02] px-3 py-2">
               <p className="text-[10px] uppercase tracking-[0.16em] text-faint">Workspace</p>
               <div className="mt-1 flex items-center justify-between gap-2">
-                <span className="truncate text-xs font-medium text-ink">Preview workspace</span>
-                <Badge tone="warn">Shell</Badge>
+                <span className="truncate text-xs font-medium text-ink" title={workspaceName}>
+                  {workspaceName}
+                </span>
+                <Badge tone={workspaceRole === "OWNER" ? "accent" : workspaceRole === "OPERATOR" ? "info" : "neutral"}>
+                  {workspaceRole}
+                </Badge>
               </div>
             </div>
           </div>
           <Navigation pathname={pathname} />
-          <SidebarFooter />
+          <SidebarFooter
+            userName={userName}
+            userEmail={userEmail}
+            workspaceRole={workspaceRole}
+            onSignOut={handleSignOut}
+            signingOut={signingOut}
+          />
         </aside>
 
         {open ? (
@@ -231,7 +313,13 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </button>
               </div>
               <Navigation pathname={pathname} onNavigate={() => setOpen(false)} />
-              <SidebarFooter />
+              <SidebarFooter
+                userName={userName}
+                userEmail={userEmail}
+                workspaceRole={workspaceRole}
+                onSignOut={handleSignOut}
+                signingOut={signingOut}
+              />
             </aside>
           </div>
         ) : null}
@@ -277,7 +365,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           <footer className="border-t border-line px-4 py-5 md:px-8">
             <div className="mx-auto flex w-full max-w-[1500px] flex-col gap-3 text-[11px] text-faint sm:flex-row sm:items-center sm:justify-between">
-              <p>Interlock preview shell · Phase 1 · simulation only</p>
+              <p>Interlock preview shell · Phase 2 · simulation only</p>
               <div className="flex flex-wrap items-center gap-4">
                 <a
                   href="https://github.com/onyebuchidaniel60/interlock#readme"

@@ -170,14 +170,14 @@ export default function DashboardPage() {
           <SectionHeading
             title="Provider readiness"
             description="Credentials are server-only. This panel never prints secret values."
-            action={<Badge tone="info">Phase 1</Badge>}
+            action={<Badge tone="info">Phase 2</Badge>}
           />
           <div className="mt-3">
             <StatusRow
               label="Neon Postgres + Managed Better Auth"
-              value="Phase 2"
-              tone="neutral"
-              detail="Database, roles, RLS and sessions are not wired in this shell."
+              value="Connected"
+              tone="accent"
+              detail="Sessions verified server-side; app_user queries with RLS."
             />
             <StatusRow
               label="Walrus Memory mainnet"
