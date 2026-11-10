@@ -8,7 +8,7 @@ export function GET() {
     {
       status: "ok",
       service: "interlock",
-      phase: "6",
+      phase: "9",
       mode: "simulation",
       timestamp: new Date().toISOString(),
     },
