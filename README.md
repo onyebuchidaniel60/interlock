@@ -4,7 +4,7 @@
 
 > **Status: functional MVP.** Authentication, Neon/RLS, Tatum observations, Walrus Memory writes/recall, deterministic Sentinel decisions, one-time simulated execution and the Memory OFF/ON demo comparison are implemented and tested. The demo video is still pending.
 
-**Protected preview:** <https://interlock-q8n7d5x66-uhhh2.vercel.app> (Vercel Authentication required)
+**Protected preview:** <https://interlock-835nkre11-uhhh2.vercel.app> (Vercel Authentication required)
 
 ## What it does
 

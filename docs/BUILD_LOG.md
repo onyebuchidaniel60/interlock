@@ -454,3 +454,11 @@ Minimum operator action: provide production Neon URLs/roles/auth env, backup/res
 Next task: production inputs or preview release sign-off.
 Authorization boundary: production remains bounded to Phase 9 and unexercised.
 ```
+
+## Final preview deployment
+
+- Final preview URL: `https://interlock-835nkre11-uhhh2.vercel.app`
+- Deployed source commit: `b6c0aba` (final phase marker; Phase 9 release commit `2ad6646`).
+- Health: `{"status":"ok","service":"interlock","phase":"9","mode":"simulation"}`.
+- Public access: `302` to Vercel SSO; Vercel Authentication enabled; `protectionBypass` empty.
+- Production: not deployed; production Neon/Walrus credentials and backup path missing.
