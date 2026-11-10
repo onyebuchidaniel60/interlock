@@ -35,18 +35,19 @@ Architecture decision:
 - Atomic unit: MIST; `1 SUI = 1,000,000,000 MIST`.
 - Use integer strings/BigInt, not JavaScript floating-point numbers.
 
-**Important compatibility caveat:** The Tatum documentation establishes its Sui gRPC endpoint and authentication, but does not conclusively list support for the exact `StateService.GetBalance` method required here. The coding agent must smoke-test that exact method against Tatum's endpoint with the operator's key and public address before implementation relies on it. If unavailable, report the method/status and pause the Tatum integration for operator choice. Do not silently switch to legacy JSON-RPC or an unapproved provider. The Sui Foundation mainnet JSON-RPC deprecation/disablement makes a legacy JSON-RPC assumption especially inappropriate.
+**Phase 0 verification:** `StateService.GetBalance` is implemented by Tatum mainnet. The exact call succeeded during Phase 0 with official Sui API protobufs pinned at `MystenLabs/sui-apis` commit `79485a8328e2f58fa047e4ce1327704b412e958a`. The supplied `SUI_DEMO_ADDRESS` returned `balance="0"` MIST and no checkpoint/finality fields; `ListBalances` was empty. Method/auth is verified; the funded-balance demo path needs a funded or replacement address. Do not silently switch to legacy JSON-RPC or an unapproved provider. The Sui Foundation mainnet JSON-RPC deprecation/disablement makes a legacy JSON-RPC assumption especially inappropriate.
 
 Store only provider fields actually returned. A checkpoint or finality field must remain null/absent if the selected method does not supply it.
 
-## Supabase
+## Neon Postgres and Managed Better Auth
 
 Official documentation:
-- [Supabase Auth with Next.js SSR](https://supabase.com/docs/guides/auth/server-side/nextjs)
-- [Supabase Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security)
-- [Supabase CLI migrations](https://supabase.com/docs/guides/cli/local-development)
+- [Neon Managed Better Auth overview](https://neon.com/docs/auth/overview)
+- [Neon Auth Next.js server SDK](https://neon.com/docs/auth/reference/nextjs-server)
+- [Neon branching](https://neon.com/docs/introduction/branching)
+- [PostgreSQL Row Level Security](https://www.postgresql.org/docs/current/ddl-rowsecurity.html)
 
-Use `@supabase/ssr` for Next.js cookie-based server/client auth integration. Enforce RLS on all workspace-owned tables and test cross-tenant isolation. Do not expose service-role credentials in client code or use them as a shortcut around authorization.
+Phase 0 operator-authorized change: Supabase is replaced by Neon because the Supabase quota is exhausted. Use Neon Postgres with Managed Better Auth. `DATABASE_URL_UNPOOLED` (`neondb_owner`) is for migrations only; `DATABASE_URL_APP` (`app_user`, `NOBYPASSRLS`) is for all application queries. Verify `SELECT current_user` is `app_user` and that the role cannot bypass RLS. RLS policies are plain PostgreSQL; `auth.uid()` is not available. Set request-scoped `app.user_id` inside a transaction with `set_config(..., true)` and join to `workspace_members`. Server auth uses `createNeonAuth` from `@neon/auth/next/server` with `NEON_AUTH_BASE_URL` and `NEON_AUTH_COOKIE_SECRET`; verify and pin the exact package version during implementation. Preview and production use separate Neon projects/branches.
 
 ## Next.js
 
@@ -55,13 +56,13 @@ Official documentation:
 
 Use App Router and Node runtime for server route handlers that load gRPC and Walrus SDKs. Pin a version compatible with React/SDK dependencies during Phase 0/Phase 1; do not float major versions.
 
-## OpenAI
+## Groq (Analyst only)
 
 Official documentation:
-- [OpenAI Responses API](https://platform.openai.com/docs/api-reference/responses)
-- [Structured Outputs](https://platform.openai.com/docs/guides/structured-outputs)
+- [Groq OpenAI compatibility](https://console.groq.com/docs/openai)
+- [Groq structured outputs](https://console.groq.com/docs/structured-outputs)
 
-The model is optional and limited to Analyst-generated explanatory text/structured draft. It cannot set numeric plan fields, invoke privileged tools, evaluate constraints or issue a Sentinel verdict. Model availability, quota, price and account permissions must be checked in intake; use deterministic fixture text for tests.
+Phase 0 operator-authorized change: OpenAI is replaced by Groq for Analyst. Use the OpenAI-compatible SDK against `https://api.groq.com/openai/v1`, `GROQ_API_KEY` server-only, and the confirmed model `qwen/qwen3.8-27b`. Structured outputs must use a strict JSON schema with `additionalProperties: false` and every property listed in `required`. The model is optional and limited to Analyst-generated explanatory text/structured draft. It cannot set numeric plan fields, invoke privileged tools, evaluate constraints or issue a Sentinel verdict. Verify current model/quota/price during implementation; use deterministic fixture text for tests and a deterministic fallback on failure.
 
 ## Vercel and TTS
 

@@ -69,8 +69,8 @@ interlock/
 │   ├── integrations/
 │   │   ├── walrus/
 │   │   ├── tatum/
-│   │   ├── openai/
-│   │   └── supabase/
+│   │   ├── groq/
+│   │   └── neon/
 │   ├── components/
 │   ├── hooks/
 │   ├── lib/
@@ -82,8 +82,7 @@ interlock/
 │   │   ├── observability/
 │   │   └── config/
 │   └── types/
-├── supabase/
-│   ├── config.toml
+├── db/
 │   ├── migrations/
 │   └── seed.sql
 ├── tests/
@@ -119,7 +118,7 @@ interlock/
 - `src/features/agents/*`: role-specific orchestration; Sentinel evaluator should be a pure function with isolated tests.
 - `src/integrations/*`: provider adapters and SDK normalization; no UI imports.
 - `src/lib/auth`, `security`, `crypto`: session/membership enforcement, clearance signing and verification.
-- `supabase/migrations`: version-controlled schema/RLS changes.
+- `db/migrations`: version-controlled schema/RLS changes applied through the Neon migration role.
 - `tests/`: unit, integration, end-to-end, security tests and deterministic fixtures.
 - `scripts/provider-smoke-tests`: explicit, non-destructive Tatum/Walrus checks.
 - `demo/`: approved narration and final demo output; apply repo policy for large video files.

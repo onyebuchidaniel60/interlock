@@ -244,7 +244,7 @@ Constraints are append-only. Superseding creates a new record with `supersedesRe
 | Plan | Plan changed after check | New hash; old decision/clearance invalid |
 | Runner | Replay/concurrent requests | Atomic one-time consume; unique execution constraint |
 | DB | Transaction failure | Roll back; no success state or clearance consumption ambiguity |
-| OpenAI | Timeout/invalid JSON | Deterministic explanation fallback; no policy effect |
+| Analyst | Timeout/invalid schema output | Deterministic explanation fallback; no policy effect |
 | Auth | Cross-tenant identifier | 404 or 403 consistently; no data leak |
 | Demo | Baseline invoked outside preview | 404/403; startup config validation fails if demo flag enabled in production |
 | Demo | Required evidence unavailable | Show HOLD/error; never fabricate comparison outcome |

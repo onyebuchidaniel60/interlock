@@ -1,6 +1,6 @@
 # API.md — Interlock HTTP API Contract
 
-All endpoints are same-origin `/api` Route Handlers using Node runtime where server integrations require it. All user-facing requests require a valid Supabase session except `/api/health`. Authorization is based on the authenticated user's verified workspace membership. Client-supplied `workspaceId`, role or agent identity is never trusted.
+All endpoints are same-origin `/api` Route Handlers using Node runtime where server integrations require it. All user-facing requests require a valid Neon Managed Better Auth session except `/api/health`. Authorization is based on the authenticated user's verified workspace membership. Client-supplied `workspaceId`, role or agent identity is never trusted.
 
 ## Standard response envelope
 
@@ -188,7 +188,7 @@ Do not expose stack traces, SQL, provider credentials, keys, raw authorization h
 - Observation/Scout calls: per user/workspace and external provider budget; strict daily cap.
 - Walrus writes: per agent/workspace; bound concurrency and job polling.
 - Plan checks: per user/workspace; coalesce duplicate in-flight same-plan requests.
-- Login attempts: rely on Supabase controls plus application protections.
+- Login attempts: rely on Neon Auth controls plus application protections.
 - Demo reset: extremely low rate; Owner only.
 - Idempotency keys are stored with user/workspace/operation/resource and request hash. Same key + same hash returns original result; same key + different hash returns 409.
 

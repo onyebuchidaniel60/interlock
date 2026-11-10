@@ -50,7 +50,7 @@ The baseline is not a production mode or a Sentinel bypass. In normal Interlock 
 - Tatum Sui mainnet gRPC is the preferred source for a read-only balance observation.
 - Sentinel is deterministic. An LLM never makes the final approve/reject decision.
 - Runner supports simulation only.
-- Supabase Auth + PostgreSQL/RLS for invite-only workspace access.
+- Neon Postgres + Managed Better Auth + PostgreSQL RLS for invite-only workspace access.
 - No x402/MPP payments in the MVP.
 - No Redis, Kafka, separate vector database, wallet custody or real execution adapter.
 
@@ -127,7 +127,7 @@ Runner receives only final APPROVE clearance → verify signature, workspace, pl
 
 ## 8. Architecture in one paragraph
 
-A Next.js App Router application runs on Node.js. Supabase provides Auth, PostgreSQL and row-level security. Server-only integration modules call the Walrus Memory TypeScript SDK, Tatum Sui gRPC and OpenAI Responses API. Scout uses deterministic provider data; Analyst may use OpenAI only to draft a schema-constrained rationale; Sentinel is a pure deterministic policy evaluator using PostgreSQL metadata filters plus verified Walrus recall; Runner is a simulation-only service that enforces a signed, short-lived, one-time Sentinel clearance. Vercel hosts a protected preview. No queue broker is introduced; asynchronous Walrus jobs are tracked in PostgreSQL and polled with bounded backoff.
+A Next.js App Router application runs on Node.js. Neon provides Postgres, Managed Better Auth and row-level security. Server-only integration modules call the Walrus Memory TypeScript SDK, Tatum Sui gRPC and Groq's OpenAI-compatible API. Scout uses deterministic provider data; Analyst may use Groq only to draft a schema-constrained rationale; Sentinel is a pure deterministic policy evaluator using PostgreSQL metadata filters plus verified Walrus recall; Runner is a simulation-only service that enforces a signed, short-lived, one-time Sentinel clearance. Vercel hosts a protected preview. No queue broker is introduced; asynchronous Walrus jobs are tracked in PostgreSQL and polled with bounded backoff.
 
 ## 9. Fixed stack
 
@@ -135,12 +135,12 @@ A Next.js App Router application runs on Node.js. Supabase provides Auth, Postgr
 - Tailwind CSS 4; shadcn/ui primitives; Lucide icons.
 - Zod schemas shared across UI and server contracts.
 - Next.js Route Handlers, Node runtime for server integrations.
-- Supabase PostgreSQL + Supabase Auth; `@supabase/ssr`; RLS.
-- Walrus Memory TypeScript SDK: `@mysten-incubation/memwal` (confirm current package/version and SDK compatibility in intake; pin exact tested version in lockfile).
+- Neon PostgreSQL + Managed Better Auth; `@neon/auth/next/server`; plain PostgreSQL RLS with `app_user` (`NOBYPASSRLS`) and a separate `neondb_owner` migration role.
+- Walrus Memory TypeScript SDK: `@mysten-incubation/memwal` (Phase 0 tested `0.1.14`; pin exact tested version in lockfile).
 - Tatum Sui mainnet gRPC; `@grpc/grpc-js`, `@grpc/proto-loader`, official Sui API protobuf definitions pinned to a reviewed commit/package.
-- OpenAI Responses API with Structured Outputs for Analyst only; default model setting `gpt-6-astra` only if account access is confirmed, else choose a currently available approved model during intake and document it.
-- Vercel protected preview; production deploy requires explicit authorization.
-- Vitest, Testing Library, Playwright; Supabase CLI migrations.
+- Groq OpenAI-compatible API with strict JSON-schema Structured Outputs for Analyst only; confirmed model `qwen/qwen3.8-27b`.
+- Vercel protected preview; production deploy requires the bounded Phase 9 authorization.
+- Vitest, Testing Library, Playwright; version-controlled SQL migrations applied through the Neon migration role.
 
 ## 10. Architecture constraints
 
@@ -150,13 +150,13 @@ A Next.js App Router application runs on Node.js. Supabase provides Auth, Postgr
 - `listMemories` is metadata discovery, not content retrieval. Do not expect it to return decrypted payloads.
 - If Walrus cannot be read, candidate coverage cannot be demonstrated, or verification fails, Sentinel returns `HOLD`.
 - Keep Tatum and Walrus secrets server-side. Never collect wallet private keys or seed phrases.
-- Runtime must not depend on Supabase `service_role` for ordinary user operations; privileged maintenance tasks are tightly scoped and server-only.
+- Runtime must not use the `neondb_owner` migration role or any `BYPASSRLS` role for application queries; use `app_user` and verify `current_user` at startup.
 
 ## 11. Required screens
 
 `/login`, `/setup`, `/dashboard`, `/observations`, `/memory`, `/plans`, `/plans/new`, `/plans/[id]`, `/decisions/[id]`, `/audit`, `/agents`, `/settings`, `/demo`.
 
-All routes need permission-aware navigation and appropriate loading, empty, validation, success, error, denied and not-found states. Full screen inventory and behaviors are in `PROJECT_SPEC.md`. No reference UI image has been provided yet; see `REFERENCE_ASSETS.md` and Phase 0 intake.
+All routes need permission-aware navigation and appropriate loading, empty, validation, success, error, denied and not-found states. Full screen inventory and behaviors are in `PROJECT_SPEC.md`. Four operator-supplied reference images are recorded in `REFERENCE_ASSETS.md`; use them directly in Phase 6 without copying third-party branding or text.
 
 ## 12. Integration inventory
 
@@ -164,20 +164,20 @@ All routes need permission-aware navigation and appropriate loading, empty, vali
 |---|---|---|---|
 | Walrus Memory mainnet | Persistent writes and recall | Dedicated account ID, namespace, delegated agent keys | Yes |
 | Tatum Sui gRPC mainnet | Read-only SUI balance observation | API key; public address | Yes |
-| Supabase | Auth, Postgres, RLS | Project and migration access | Yes |
-| OpenAI | Structured Analyst text only | API key, approved model, budget ceiling | Optional for the smallest functional core; deterministic fixture fallback for tests only |
+| Neon | Auth, Postgres, RLS | Project/branch, `neondb_owner` migration access, `app_user` app access, Neon Auth config | Yes |
+| Groq | Structured Analyst text only | API key, confirmed model, free-tier request cap | Optional for the smallest functional core; deterministic fixture fallback for tests only |
 | Vercel | Protected frontend preview | Project/deploy access | Required for early deployed preview unless operator selects an equally safe host |
 | TTS provider | Demo narration | Free tier and quota verification | Optional; free permitted fallback required |
 
 ## 13. Security posture
 
-MVP is simulation-only and fail-closed. No real execution endpoint or wallet signing exists. Enforce Supabase RLS and server-side workspace authorization; validate all external and user inputs; constrain outbound network access; verify Walrus provenance and content hashes; enforce exact policy semantics; rate-limit expensive operations; redact secrets; make memory and audit changes append-only; protect Runner with one-time signed clearances and atomic DB consumption. See `ARCHITECTURE.md` and `docs/TESTING.md` for the threat controls and test cases.
+MVP is simulation-only and fail-closed. No real execution endpoint or wallet signing exists. Enforce Neon RLS with `app_user` (`NOBYPASSRLS`) and server-side workspace authorization; validate all external and user inputs; constrain outbound network access; verify Walrus provenance and content hashes; enforce exact policy semantics; rate-limit expensive operations; redact secrets; make memory and audit changes append-only; protect Runner with one-time signed clearances and atomic DB consumption. See `ARCHITECTURE.md` and `docs/TESTING.md` for the threat controls and test cases.
 
 ## 14. Autonomous implementation sequence
 
 1. Phase 0: inspect repo and complete one consolidated operator intake; validate essential assets, credentials, permissions, budgets and service smoke tests. No coding while critical intake blockers remain.
 2. Phase 1: repository/platform foundation; responsive route shell; early protected preview with labelled placeholders and safe data.
-3. Phase 2: Supabase schema, migrations, auth, RLS, domain persistence and health checks.
+3. Phase 2: Neon schema, migrations, Managed Better Auth, RLS, domain persistence and health checks.
 4. Phase 3: Walrus/Tatum/Analyst integrations, Sentinel evaluator, APIs and Runner gate.
 5. Phase 4: connect all routes to real application behavior.
 6. Phase 5: full end-to-end functionality and failure-path gate.
@@ -188,45 +188,46 @@ MVP is simulation-only and fail-closed. No real execution endpoint or wallet sig
 
 No routine phase approval stops. Each checkpoint is test → inspect → fix → commit → update `AI_HANDOFF.md` and `docs/BUILD_LOG.md` → continue. Stop only for a genuine blocker or an action outside exact authority.
 
-## 15. Unresolved operator intake items
+## 15. Operator intake status
 
-The following are deliberately not invented:
-- Target repository and access; the Assay repository is only a reference blueprint and is not automatically the target.
-- At least one UI reference image or explicit authorization for the coding agent to generate one.
-- Supabase project access and Auth configuration.
-- Dedicated Walrus account ID, namespace and delegated keys, with signed mainnet write/read smoke test.
-- Tatum key and public Sui demo address; prove `StateService.GetBalance` works on the specified Tatum gateway.
-- OpenAI access/model/cost ceiling, or authorization to use the deterministic Analyst fallback.
-- Vercel preview access and protected-preview settings.
-- Maximum spend (default recommendation: **$0 unapproved spend**).
-- Explicit production-release authorization (default: **DENIED**).
-- Demo audience, pronunciation, redactions and approved output path.
+Phase 0 is complete. `OPERATOR_INTAKE.md` records the consolidated answers and independent verification. Key resolutions:
+- Target repository: `https://github.com/onyebuchidaniel60/interlock`, branch `main`.
+- Four original UI reference images supplied in `design/reference/`; ownership and design observations recorded.
+- Neon replaces Supabase by operator-authorized architecture change; migration and application roles are explicitly separated.
+- Dedicated Walrus account/namespace/delegate keys validated with a signed mainnet write → terminal → metadata → recall/hash/author test.
+- Tatum key and `StateService.GetBalance` verified; the supplied demo address currently returns a zero balance and must be funded/replaced before the funded-balance demo.
+- Groq replaces OpenAI for Analyst; confirmed model and strict structured-output contract recorded.
+- Vercel preview access authorized; preview not yet deployed.
+- Budget: $0 unapproved spend; free tiers only.
+- Production: bounded Phase 9 release authority recorded; all other actions denied.
+- Demo audience, pronunciation, redactions, output path, TTS and GitHub footer link recorded.
 
-These are consolidated in `OPERATOR_INTAKE.md`. The coding agent must not ask one question at a time or repeat information already in the repository or this package.
+The coding agent must not ask one question at a time or repeat information already in the repository or this package.
 
 ## 16. Coding agent start point
 
-**Exact first task:** Read this entire handoff package and the repository's own agent instructions; inspect the repository without modifying it; complete the consolidated `OPERATOR_INTAKE.md` readiness check; verify actual reference images; validate credentials, account permissions/scopes, service quotas, Tatum gRPC method support, Walrus mainnet write/read, deployment access and budget limits; record exact production authority. Do not begin implementation while a critical input is missing. Once readiness passes, execute Phase 1 onward autonomously without routine approval requests.
+**Exact current task:** Phase 0 is complete. Wait for the operator's explicit “begin Phase 1” message, then execute Phase 1 onward autonomously. Re-read `AI_HANDOFF.md` and `IMPLEMENTATION_PLAN.md` before starting. Do not begin application work in the Phase 0 reply. When Phase 1 begins, establish the Next.js foundation and protected preview before deeper implementation.
 
 ## 17. Current completion status
 
-Product/architecture blueprint: drafted.  
-Application code: **not started**.  
-Repository: **not confirmed**.  
-UI reference image: **not supplied**.  
-Credentials and external service access: **not validated**.  
-Preview URL / deployed commit: **none**.  
-Tests: **not run**.  
-Production authorization: **not granted**.  
+- Product/architecture blueprint: drafted and Phase 0-updated.
+- Application code: **not started**.
+- Repository: **confirmed** — `https://github.com/onyebuchidaniel60/interlock`, branch `main`.
+- UI reference images: **four supplied and inspected**.
+- Credentials and external service access: **Walrus and Tatum validated; Neon/Groq configured, not yet exercised**.
+- Preview URL / deployed commit: **none**.
+- Tests: **two authorized Phase 0 smoke tests passed/recorded; no application tests yet**.
+- Production authorization: **bounded Phase 9 release only**.
+- Demo data note: **`SUI_DEMO_ADDRESS` currently returns zero; fund/replace before funded-balance demo**.
 
 
 ## 18. Recommended repository structure
 
-See `docs/REPOSITORY_STRUCTURE.md` for the full proposed Next.js/Supabase tree. Preserve existing repository conventions when compatible; keep the MVP as one modular application, not separate microservices.
+See `docs/REPOSITORY_STRUCTURE.md` for the full proposed Next.js/Neon tree. Preserve existing repository conventions when compatible; keep the MVP as one modular application, not separate microservices.
 
 ## 19. Environment configuration
 
-See `docs/CONFIGURATION.md` and `docs/CONFIGURATION_ENV_TEMPLATE.md`. Client-safe variables are limited to Supabase public URL/publishable key and any genuinely public monitoring DSN. Walrus delegate keys, Tatum/OpenAI keys, signing secrets and Supabase privileged keys remain server-only.
+See `docs/CONFIGURATION.md` and `docs/CONFIGURATION_ENV_TEMPLATE.md`. Client-safe variables are limited to the public app URL and any genuinely public monitoring DSN. Walrus delegate keys, Tatum/Groq keys, Neon URLs/secrets, signing secrets and auth cookie secrets remain server-only. Application queries use `DATABASE_URL_APP` (`app_user`, `NOBYPASSRLS`); `DATABASE_URL_UNPOOLED` is migration-only.
 
 ## 20. Final pre-implementation audit
 
@@ -250,10 +251,10 @@ See `docs/CONFIGURATION.md` and `docs/CONFIGURATION_ENV_TEMPLATE.md`. Client-saf
 - [x] Autonomous checkpoints, commits, AI_HANDOFF and build log updates are required.
 - [x] README/docs/footer/link/accessibility requirements are included.
 - [x] Demo video is capped at 180 seconds and requires capture, TTS verification, synchronization, redaction and review.
-- [ ] Target repository and all required credentials/provider smoke tests validated — pending Phase 0.
+- [x] Target repository, reference images and required credentials/provider smoke tests validated in Phase 0; zero-balance demo address recorded as an open demo-data action.
 
 No coding agent should interpret this blueprint as permission to begin before critical Phase 0 inputs are validated. The pending items are intentional operator-intake blockers, not decisions pushed downstream.
 
 ## 21. CODING AGENT START POINT
 
-**Exact first task:** Read the handoff package and repository instructions; inspect the target repository without modifying code; complete the consolidated Operator Intake/Readiness Check in `OPERATOR_INTAKE.md`; inspect and record real reference images; verify credentials, access permissions, scopes, quotas, Tatum gRPC method support, Walrus mainnet write/read, Supabase migrations/RLS, protected preview access and budget limits; record exact production-release authority. Do not implement while critical inputs are missing. When ready, execute Phase 1 onward autonomously, following `IMPLEMENTATION_PLAN.md`, without routine approval stops.
+**Exact current task:** Phase 0 is complete and recorded in `OPERATOR_INTAKE.md`. Wait for the operator's explicit “begin Phase 1” message, then read the handoff package and repository instructions and execute Phase 1 onward autonomously, following `IMPLEMENTATION_PLAN.md`. The only open demo-data action is funding/replacing `SUI_DEMO_ADDRESS` before the funded-balance demo; it does not block Phase 1 scaffold work.

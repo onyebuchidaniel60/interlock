@@ -11,10 +11,11 @@ This package is a design/handoff artifact only. It contains no implemented app c
 - `AGENTS.md` — persistent coding agent operating rules.
 - `AI_HANDOFF.md` — exact current implementation state and next task.
 - `OPERATOR_INTAKE.md` — one consolidated readiness check and authorization register.
-- `REFERENCE_ASSETS.md` — honest record that no UI image is supplied and instructions for intake.
+- `REFERENCE_ASSETS.md` — inventory, ownership and design observations for the four supplied UI reference images.
 - `DEMO_VIDEO_PLAN.md` — story/script/capture/TTS/redaction/review requirements <=180 sec.
 - `README.md` — project overview and handoff guide.
 - `PROPER_VIBE_CODING_WORKFLOW_AUTONOMOUS.md` — supplied workflow reference copied into package.
+- `design/reference/` — four operator-supplied UI reference images.
 - `MANIFEST.md` — this file.
 
 ## Supporting docs
@@ -35,4 +36,4 @@ This package is a design/handoff artifact only. It contains no implemented app c
 
 ## Important status
 
-The project has not been coded. Phase 0 still requires target repository selection, one or more UI reference images (or explicit authorization for generated references), actual Walrus mainnet credentials/account, Tatum key/public address/method smoke test, Supabase access, protected preview access, budgets and demo settings. Production authority defaults to DENIED.
+The project has not been coded. Phase 0 is complete: target repository, reference images, Walrus mainnet credentials and signed write/read test, Tatum key/address/method test, Neon database/auth decision, Groq Analyst decision, protected preview access, budget and demo settings are recorded. The supplied demo address returned a zero balance and must be funded/replaced before the funded-balance demo. Phase 1 application work has not started and awaits the operator's explicit “begin Phase 1” message. Production authority is bounded to the Phase 9 actions recorded in `OPERATOR_INTAKE.md`; all other production actions remain DENIED.

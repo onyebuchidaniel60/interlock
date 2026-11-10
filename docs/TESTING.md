@@ -12,19 +12,40 @@ Test pure domain logic without database/network:
 - Plan/FACT/clearance expiry boundaries.
 - Signed token claim binding and invalid signature/expiry/audience/nonce.
 - Demo config guard rejects production baseline.
+- Groq structured-output schema validation and deterministic fallback.
 
 ## Integration tests
 
-- Supabase migrations, constraints and RLS for every tenant-owned table.
-- Cross-workspace resource access blocked for SELECT/INSERT/UPDATE/DELETE.
-- Supabase session and membership/role checks.
+### Database, roles and RLS
+
+- Apply version-controlled migrations through `DATABASE_URL_UNPOOLED` (role `neondb_owner`) in a disposable preview/test Neon branch.
+- Verify the application connection reports `current_user=app_user` and the role has `NOBYPASSRLS`.
+- Negative test: application code cannot connect with or fall back to the migration URL.
+- RLS enabled on every workspace-owned table; test SELECT/INSERT/UPDATE/DELETE cross-workspace denial.
+- RLS context test: request-scoped `set_config('app.user_id', $1, true)` inside a transaction; missing/empty/invalid context denies.
+- Assert policies do not depend on `auth.uid()` or Supabase-specific functions.
+- Test workspace-membership join policies, including revoked/expired membership.
+- Test that `app_user` does not own tables and cannot disable RLS or bypass policies.
+- Test pooled-connection isolation: `app.user_id` from one request cannot leak into another request.
+- Test migration idempotency/rollback in a disposable branch; do not run destructive tests against production.
+
+### Authentication and authorization
+
+- Neon Managed Better Auth session creation, expiry, refresh and sign-out.
+- Cookie signature/tamper tests using `NEON_AUTH_COOKIE_SECRET`; invalid/tampered/expired session is rejected.
+- Invite-only membership acceptance; duplicate invite; expired invite.
+- Membership role checks on every route; Observer read-only; Owner-only policy mutations.
+- Cross-tenant IDOR attempts through IDs, query parameters and request bodies.
+
+### Providers and domain flows
+
 - Tatum gRPC adapter: valid response parsing, auth error, timeout, rate limit, unexpected fields, invalid address, zero balance.
 - Walrus adapter: pending job, completed job/blob ID, metadata listing, recall content, missing result, hash mismatch, namespace mismatch, SDK timeout and retry.
 - Memory lifecycle: pending entry is not active; failed verification cannot be used by Sentinel.
 - Decision persistence and evidence rows atomic.
 - Clearance consumption + execution row atomic under concurrent requests.
 - Idempotency same key/same body returns original result; same key/different body returns 409.
-- Analyst structured output schema failures/timeouts do not impact policy correctness.
+- Analyst Groq structured-output schema failures/timeouts do not impact policy correctness; deterministic fallback is used and never authorizes an action.
 
 ## End-to-end critical journeys
 
@@ -40,11 +61,13 @@ Test pure domain logic without database/network:
 10. Runner blocks REJECT, HOLD, expired approval, changed plan hash, wrong workspace, wrong decision, invalid signature and replay.
 11. Observer is read-only; cross-tenant user cannot access any record.
 12. Provider outage or missing recall displays HOLD/degraded state, never approval.
+13. Production config guard rejects demo baseline or non-simulation execution mode at startup.
 
 ## Security tests
 
 - IDOR/cross-workspace enumeration.
 - Role escalation by modifying request body, headers or client state.
+- RLS bypass attempts: application role, search path, table ownership, `SET ROLE`, function security, missing `app.user_id`.
 - SQL injection/XSS payloads in notes, rationale, labels and memory content.
 - CSRF/session misuse for mutating routes.
 - SSRF attempt via supplied URLs (there must be no user-configurable provider URL).
@@ -53,7 +76,7 @@ Test pure domain logic without database/network:
 - Memory poisoning by unauthorized agent, wrong scope, malformed hash, replayed record or false anchor.
 - Recall omission/partial candidates; all must HOLD.
 - Clearance forgery/replay/concurrency.
-- Secret scans and client bundle inspection.
+- Secret scans and client bundle inspection; assert no Neon/Groq/Tatum/Walrus/signing secrets in `NEXT_PUBLIC_*` or client chunks.
 - Demo endpoint and baseline feature disabled in production.
 
 ## Acceptance/test evidence

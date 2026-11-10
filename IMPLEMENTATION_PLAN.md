@@ -16,10 +16,10 @@ Do not begin implementation until Phase 0 confirms all critical inputs and requi
 3. Complete `OPERATOR_INTAKE.md` in one pass. Ask all remaining critical questions together; do not repeat known information.
 4. Inspect every supplied UI reference asset; record exact path, source/ownership and intended screens. If absent, ask for one/small set or explicit authorization to generate image references.
 5. Verify target repo/write permissions, Node/package manager, Git identity, preview host access and protection.
-6. Validate Supabase project access, migration permissions and Auth approach.
+6. Validate Neon project/branch access, migration role and application role boundaries, and Managed Better Auth approach.
 7. Validate Walrus dedicated mainnet account ID/namespace/delegate keys via signed write→job completion→metadata→recall smoke test. Confirm no shared/sample account is being reused.
 8. Validate Tatum key and `StateService.GetBalance` through the exact Tatum Sui mainnet gRPC gateway using a public demo address. Record method support and response fields. Do not switch providers or use deprecated JSON-RPC without explicit operator decision.
-9. Confirm OpenAI account/model/quota/cost ceiling or choose deterministic Analyst fallback.
+9. Confirm Groq account/model/quota/cost ceiling or choose deterministic Analyst fallback.
 10. Confirm budget ceiling and paid-service restrictions. Default: no spend without explicit amount authorization.
 11. Confirm production deployment authority; default DENIED. Confirm demo audience, voice/TTS preferences, output path and redactions.
 12. Record readiness status and blockers. Do not start implementation with critical inputs missing.
@@ -48,9 +48,9 @@ Do not begin implementation until Phase 0 confirms all critical inputs and requi
 
 **Objective:** Build secure tenant foundation and schema before core integrations.
 
-**Tasks:** Supabase migrations for workspaces, memberships, agent identities, wallet sources, observations, memories/jobs, plans, decisions/evidence, executions, audit and idempotency; RLS for every tenant-owned table; invite-only Auth; role/membership helper; server-side auth client; protected route helper; workspace resolution; health endpoint; migration/test setup; seed safe demo workspace only in preview/test.
+**Tasks:** Neon migrations for workspaces, memberships, agent identities, wallet sources, observations, memories/jobs, plans, decisions/evidence, executions, audit and idempotency; RLS for every tenant-owned table using request-scoped `app.user_id`; invite-only Managed Better Auth; role/membership helper; server-side auth client; protected route helper; workspace resolution; health endpoint; migration/test setup; seed safe demo workspace only in preview/test. Verify application connections use `app_user` (`NOBYPASSRLS`) and migrations use `neondb_owner` via `DATABASE_URL_UNPOOLED`.
 
-**Expected files:** `supabase/migrations/*`, `src/lib/auth`, `src/lib/db`, validation schemas, tests, docs updates.
+**Expected files:** `db/migrations/*`, `src/lib/auth`, `src/lib/db`, validation schemas, tests, docs updates.
 
 **Tests:** migration apply/reset, RLS matrix, role matrix, cross-tenant IDOR, session expiry, unauthorized mutation.
 
@@ -70,7 +70,7 @@ Do not begin implementation until Phase 0 confirms all critical inputs and requi
 - Implement deterministic candidate query and Sentinel evidence-completeness validation.
 - Implement pure evaluator and rules version; test 10%/15% demo scenario, 5% compliant scenario, stale/absent/conflicting policy scenarios.
 - Implement final VERDICT memory write/verification before final APPROVE.
-- Implement Analyst Responses structured output only if authorized; model output never mutates numeric plan data and never issues verdict.
+- Implement Analyst Groq structured output only if authorized; model output never mutates numeric plan data and never issues verdict.
 - Implement Runner signed clearance and atomic one-time simulation.
 - Implement all API contracts in `docs/API.md` with consistent errors, idempotency and rate controls.
 

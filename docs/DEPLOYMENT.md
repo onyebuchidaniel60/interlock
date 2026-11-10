@@ -2,21 +2,22 @@
 
 ## Environments
 
-- `development`: local development with local/sandbox DB and provider mocks where appropriate.
-- `test`: automated test services and deterministic fixtures.
-- `preview`: protected Vercel preview, safe synthetic data and explicitly approved test integrations.
-- `production`: disabled until explicit operator authorization.
+- `development`: local development with disposable/sandbox Neon branch and provider mocks where appropriate.
+- `test`: automated test services, disposable Neon branches and deterministic fixtures.
+- `preview`: protected Vercel preview, separate Neon project/branch, safe synthetic data, `interlock` Walrus namespace and explicitly approved test integrations.
+- `production`: not enabled until Phase 9 and the bounded release authority in `OPERATOR_INTAKE.md`; separate Neon project/branch and `interlock-prod` namespace.
 
 ## Phase 1 preview
 
-Deploy a route-complete skeletal shell as early as practical. Use a dedicated preview Supabase project or isolated schema and dedicated demo Walrus namespace. Do not copy production secrets or customer data. Configure access protection. Record exact preview URL, Git SHA/commit, deploy timestamp and environment in `AI_HANDOFF.md`.
+Deploy a route-complete skeletal shell as early as practical. Use a dedicated preview Neon project/branch (never the production branch) and the `interlock` Walrus namespace. Do not copy production secrets or customer data. Configure Vercel Authentication protection. Record exact preview URL, Git SHA/commit, deploy timestamp and environment in `AI_HANDOFF.md`.
 
 ## Migrations
 
-- Use version-controlled Supabase CLI migrations.
-- Apply to local/test first.
-- Verify RLS and data ownership before preview.
-- Never use destructive schema operations against production without explicit authority and verified backup/rollback.
+- Use version-controlled SQL migrations applied through the Neon migration role (`DATABASE_URL_UNPOOLED`, `neondb_owner`).
+- Application runtime uses `DATABASE_URL_APP` (`app_user`, `NOBYPASSRLS`); never use the migration URL in the app.
+- Apply to local/test/preview branches first.
+- Verify `current_user`, role attributes, RLS and data ownership before preview.
+- Never use destructive schema operations against production without bounded authority and a verified backup/rollback path.
 - Do not apply migrations to production merely because preview deploy is authorized.
 
 ## Preview safety
@@ -28,9 +29,9 @@ Deploy a route-complete skeletal shell as early as practical. Use a dedicated pr
 
 ## Production release
 
-Production release is denied by default. The coding agent must not deploy production, change DNS, publish public pages or execute production migrations unless `OPERATOR_INTAKE.md` contains an explicit bounded authorization for each relevant action.
+Production release is bounded by `OPERATOR_INTAKE.md`. After Phase 9 passes, the agent may create a Vercel production deployment for `interlock` and apply version-controlled Neon migrations to a production database only after a verified backup/rollback path exists. Production uses a separate Neon project/branch and `interlock-prod` Walrus namespace; no preview secrets are copied. No DNS changes, public marketing beyond the app, or production data import without separate approval. Startup must fail unless `INTERLOCK_EXECUTION_MODE=simulation` and `INTERLOCK_DEMO_BASELINE_ENABLED=false`.
 
-If production is not authorized, deliver verified preview, exact release commands, required secrets (names only), migration order, rollback instructions and a smoke-test checklist.
+If any production action is outside that bounded authorization, do not perform it. Deliver verified preview, exact release commands, required secret names, migration order, rollback instructions and a smoke-test checklist.
 
 ## Rollback
 

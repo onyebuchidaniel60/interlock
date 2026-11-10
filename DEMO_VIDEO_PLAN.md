@@ -40,7 +40,7 @@ Timing can be tightened after actual recording; narration must describe only wha
 
 ## Voice/TTS
 
-At production time verify whether a Google AI voice/TTS option is available for the account and region, and read current free-tier quota, terms and credentials. Do not assume free access or unlimited use. Do not incur charges without explicit authorization. If no free Google option is available, use a genuinely free and permitted fallback (e.g. a locally run open-source TTS engine after checking its current licence and model terms) and record the substitution. Human narration is also acceptable if operator approves it.
+Use **Kokoro TTS** (Apache 2.0, local, high-quality) as the preferred narration engine. If Kokoro cannot run in the approved environment, fall back to **Piper TTS**. Record the exact engine, version, voice model and any licence/attribution notes in `demo/production-notes.md`. Do not use paid TTS or incur charges without explicit authorization. Verify local availability, output quality and synchronization before final render.
 
 ## Editing and review
 

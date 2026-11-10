@@ -26,19 +26,20 @@ The MVP is simulation-only. No real trading, transfers, wallet custody, private-
 - `AGENTS.md` — persistent coding agent instructions.
 - `AI_HANDOFF.md` — current state and exact next task.
 - `OPERATOR_INTAKE.md` — one consolidated readiness check.
-- `REFERENCE_ASSETS.md` — actual image/asset inventory; currently pending.
+- `REFERENCE_ASSETS.md` — inventory of the four supplied reference images and design observations.
 - `DEMO_VIDEO_PLAN.md` — 3-minute maximum demo plan.
+- `design/reference/` — operator-supplied UI reference images.
 - `docs/` — setup, config, tests, deployment, API, data model, build log and operator guide.
 
 ## Implementation start
 
-Do not start coding until Phase 0 intake is complete. The coding agent must inspect the target repository and existing work, validate credentials and permissions, verify Walrus mainnet write/read and Tatum gRPC method support, verify a UI reference image or explicit generated-image authorization, and record budgets and production authority.
+Phase 0 intake is complete. Wait for the operator's explicit “begin Phase 1” message before starting application code. Phase 1 begins with the Next.js foundation, responsive route shell and protected Vercel preview. See `AI_HANDOFF.md` for the exact start point and `OPERATOR_INTAKE.md` for authority boundaries.
 
-Then execute the exact phase sequence in `IMPLEMENTATION_PLAN.md` without routine approval stops. Preview deployment is separate from production authorization. Production is denied unless explicitly granted.
+Then execute the exact phase sequence in `IMPLEMENTATION_PLAN.md` without routine approval stops. Preview deployment is separate from production authorization. Production is bounded to the Phase 9 actions recorded in `OPERATOR_INTAKE.md`.
 
 ## Current status
 
-Blueprint only. Target repository, reference images, service credentials, preview access and budget authority remain to be confirmed. No app code, database migration, live integration, test run or deployment is included in this package.
+Phase 0 complete; application code **not started**. The target repository, four reference images, Walrus mainnet signed write/read, Tatum gRPC method and Neon/Groq architecture decisions are recorded. No app code, database migration, deployed preview or application test exists yet. `SUI_DEMO_ADDRESS` currently returns a zero balance and must be funded or replaced before the funded-balance demo.
 
 ## Authoritative methodology
 

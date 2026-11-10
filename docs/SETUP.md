@@ -6,10 +6,11 @@ This blueprint package contains no runnable application yet. This document defin
 
 - Node.js version supported by the selected pinned Next.js release.
 - Package manager chosen based on existing repository; preserve existing lockfile if repo has one.
-- Supabase CLI and a development/test Supabase project or local stack.
+- Neon project/branch and the `app_user` application role; `DATABASE_URL_UNPOOLED` migration access and `DATABASE_URL_APP` application access.
+- Neon Managed Better Auth configured with `NEON_AUTH_BASE_URL` and a 32+ character `NEON_AUTH_COOKIE_SECRET`.
 - Access to dedicated Walrus Memory account/namespace and delegate keys.
 - Tatum API key and public Sui address for gRPC smoke testing.
-- Optional OpenAI API key/model, only within approved budget.
+- Groq API key/model within the free-tier guard; deterministic Analyst fallback available.
 - Vercel project access for protected preview.
 
 ## Setup sequence
@@ -17,13 +18,14 @@ This blueprint package contains no runnable application yet. This document defin
 1. Clone/open the operator-confirmed repository and inspect its instructions.
 2. Install dependencies using the existing lockfile's package manager.
 3. Copy `.env.example` to local environment file and configure secret values through a secure local secret store. Never commit local env files.
-4. Start Supabase locally or connect to the approved dev project.
-5. Apply version-controlled migrations using the Supabase CLI.
-6. Seed only synthetic local/test workspace and demo data.
-7. Run typecheck, lint and unit tests.
-8. Start Next.js dev server.
-9. Run `/api/health`; test authentication and workspace isolation.
-10. Run provider smoke tests using the dedicated Walrus account and Tatum gRPC key/address. Do not execute against production customer data.
+4. Connect to the approved Neon development/test branch; use `DATABASE_URL_UNPOOLED` only for migrations and `DATABASE_URL_APP` for the app.
+5. Apply version-controlled migrations through the migration role; verify `SELECT current_user` reports `app_user` from the application connection.
+6. Seed only the synthetic local/test workspace and demo data.
+7. Configure Neon Managed Better Auth and verify session creation/expiry.
+8. Run typecheck, lint and unit tests.
+9. Start the Next.js dev server.
+10. Run `/api/health`; test authentication and workspace isolation.
+11. Run provider smoke tests using the dedicated Walrus account and Tatum gRPC key/address. Do not execute against production customer data.
 
 ## Commands
 

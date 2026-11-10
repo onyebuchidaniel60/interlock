@@ -13,24 +13,24 @@
 
 ```text
 Browser (Next.js UI)
-  | Supabase Auth session cookie
+  | Neon Managed Better Auth session cookie
   v
 Next.js Route Handlers (Node runtime)
   |-- Auth + workspace membership + Zod validation
   |-- Domain services
   |    |-- Scout -------- Tatum Sui gRPC (read-only)
   |    |                 Walrus Memory (FACT write/verify)
-  |    |-- Analyst ------ OpenAI Responses (structured text only; optional)
+  |    |-- Analyst ------ Groq structured text only; optional
   |    |-- Sentinel ----- PostgreSQL candidate index
   |    |                 Walrus Memory recall + content verification
   |    |                 deterministic policy evaluator
   |    |                 Walrus VERDICT write/verify
   |    |-- Runner ------- one-time clearance verification
   |                      simulated outcome only
-  |-- Supabase Postgres + RLS
+  |-- Neon Postgres + RLS (application role app_user, NOBYPASSRLS)
   |-- Walrus Memory mainnet
   |-- Tatum Sui mainnet gRPC
-  |-- OpenAI API (optional)
+  |-- Groq API (optional)
   v
 Vercel protected preview
 ```
@@ -54,8 +54,8 @@ Use a dedicated Interlock account and namespace. Store records with clear type, 
 ### Tatum is an external observation provider
 Use only read-only public chain data. No private key, seed phrase, signer, wallet custody or transaction submission. Store exactly what provider response supports; do not invent checkpoint or finality metadata when not returned.
 
-### OpenAI is an optional language helper
-Analyst may use a structured output to draft a concise explanation of a plan. All numerical fields, policy rules and final decision are validated outside the model. The model cannot access secrets, call external tools or authorize Runner.
+### Groq is an optional language helper
+Analyst may use a structured output to draft a concise explanation of a plan. All numerical fields, policy rules and final decision are validated outside the model. The model cannot access secrets, call external tools or authorize Runner. Groq is accessed through its OpenAI-compatible API at `https://api.groq.com/openai/v1` with `GROQ_API_KEY` server-only; the confirmed model is `qwen/qwen3.8-27b`. Structured outputs must use a strict JSON schema with `additionalProperties: false` and every property listed in `required`.
 
 ## 4. Core decision architecture
 
@@ -165,22 +165,24 @@ Use separate delegate keys/identities for Scout, policy writer, Sentinel and Run
 - Persist balance values as decimal integer strings.
 - Use public wallet address only.
 
-**Readiness blocker:** smoke-test the exact `StateService.GetBalance` method against Tatum's mainnet endpoint during Phase 0. Provider docs identify its Sui gRPC endpoint, but do not conclusively enumerate that specific method. If Tatum does not expose it, stop that integration and report evidence; do not silently switch to deprecated JSON-RPC or an unapproved provider.
+**Phase 0 verification:** the exact `StateService.GetBalance` method is supported by Tatum mainnet and was called successfully during Phase 0 using official Sui protobufs pinned at commit `79485a8328e2f58fa047e4ce1327704b412e958a`. The supplied demo address returned `balance="0"` MIST and no checkpoint/finality fields; `ListBalances` was empty. The method/auth is proven; the funded-balance demo path remains pending until the operator funds or replaces `SUI_DEMO_ADDRESS`. Do not silently switch to deprecated JSON-RPC or another provider.
 
-Capture request time and response time, provider name, method, chain, address, coin type, balance/coinBalance/addressBalance if returned, and provider checkpoint/version only if actually present. Keep raw response in protected server log only if policy permits; otherwise store a redacted normalized observation.
+Capture request time and response time, provider name, method, chain, address, coin type, balance/coinBalance/addressBalance if returned, and provider checkpoint/version only if actually present. Never fabricate a checkpoint or finality value. Keep raw response in protected server log only if policy permits; otherwise store a redacted normalized observation.
 
 ## 7. Data ownership and storage
 
-- Supabase Auth owns authentication identities.
+- Neon Managed Better Auth owns authentication identities; users, sessions and auth configuration live in the `neon_auth` schema of the Neon database.
 - `workspaces` + `workspace_members` define tenant ownership and role.
 - Postgres tables own Interlock application state, deterministic metadata index and audit trail.
 - Walrus Memory owns durable agent memory payloads; Postgres `memory_entries` point to blob IDs and store the exact filtering metadata/hash.
 - Tatum owns chain read API; Interlock stores immutable observed result and source provenance.
-- OpenAI receives only minimum plan context needed for language drafting; no API keys, auth tokens or unrelated user data.
+- Groq receives only minimum plan context needed for language drafting; no API keys, auth tokens or unrelated user data.
 
 ## 8. Database and transaction design
 
 All money-like/chain atomic quantities use `numeric(78,0)` or text validated as unsigned integer string. Use text for externally supplied large integers when driver precision risk exists; convert to BigInt in server domain code. Timestamps are `timestamptz` UTC. Use workspace composite foreign keys where possible to make tenant mismatch harder.
+
+Neon role separation is mandatory: migrations use `DATABASE_URL_UNPOOLED` (`neondb_owner`), while the application uses `DATABASE_URL_APP` (`app_user`, `NOBYPASSRLS`). Application code must never import or use the migration URL. Every request-scoped transaction sets `app.user_id` for RLS; pooled connections must use transaction-local settings, not session-global state.
 
 Use DB transactions for:
 - creating plan + associated audit event;
@@ -192,12 +194,13 @@ External calls must never be placed inside a long-held SQL transaction. Use idem
 
 ## 9. Authentication and authorization
 
-- Supabase Auth email OTP/magic link; invite-only sign-up.
-- Server-side session verification via `@supabase/ssr`.
+- Neon Managed Better Auth handles identities and sessions. Server integration uses `createNeonAuth` from `@neon/auth/next/server` with `NEON_AUTH_BASE_URL` and `NEON_AUTH_COOKIE_SECRET` (32+ characters). `@supabase/ssr` and Supabase Auth are removed.
+- Sign-up is invite/membership-gated; do not expose public self-service workspace creation. Auth method (for example email/password or magic link) is configured in Neon Auth and must be verified against the current provider capabilities.
 - Owner/Operator/Observer membership role checked on every route handler.
 - Workspace ID comes from verified server membership/context; do not trust request body `workspaceId`.
-- Enable RLS on every workspace-owned table. Policies check membership via a security-conscious function or join to `workspace_members`; test both SELECT and mutation policy isolation.
-- Do not expose `SUPABASE_SERVICE_ROLE_KEY` to client. Prefer publishable key + user JWT for user-scoped data. If privileged server-only operations are required, keep them isolated, documented, and never let them bypass application authorization.
+- Enable RLS on every workspace-owned table. Plain PostgreSQL policies must use request-scoped `app.user_id` (set with `set_config('app.user_id', $1, true)` inside a transaction) joined to `workspace_members`; `auth.uid()` is not available. A missing or empty setting must deny.
+- Application queries run as `app_user`, which has `NOBYPASSRLS` and does not own the tables. Migrations run separately as `neondb_owner` via `DATABASE_URL_UNPOOLED`; `neondb_owner` has `BYPASSRLS` and must never serve application requests. Readiness must verify `SELECT current_user` is `app_user`.
+- Do not grant the application role table ownership or `BYPASSRLS`. Use explicit grants for required tables/functions and keep privileged maintenance paths isolated and documented.
 - Agents are internal capabilities; no external agent can call privileged routes without a server-side service credential.
 
 ## 10. Security threat controls
@@ -205,6 +208,7 @@ External calls must never be placed inside a long-held SQL transaction. Use idem
 | Threat | Control |
 |---|---|
 | IDOR/cross-tenant access | Membership check + RLS + workspace-scoped queries + negative tests |
+| RLS bypass through privileged role | App connects only as `app_user` (`NOBYPASSRLS`); migrations use separate `neondb_owner` URL; startup checks `current_user`; tests assert role attributes |
 | Client-side approval tampering | Server-side Sentinel and signed claims; never trust UI verdict |
 | Prompt injection | Analyst has no tool access or policy authority; treat user/agent content as data; output schema validation |
 | Memory poisoning | Agent-specific author allowlist, scope validation, immutable payload hash, provenance, quarantine and audit |
@@ -215,7 +219,7 @@ External calls must never be placed inside a long-held SQL transaction. Use idem
 | Injection | Zod validation, parameterized queries, safe ORM/query builder |
 | XSS | React escaping, safe text rendering, avoid arbitrary HTML; sanitize markdown if rendered |
 | CSRF | SameSite secure cookies; validate origin/CSRF for state-changing routes as appropriate |
-| Brute force/abuse | Supabase Auth controls, route rate limits, request size and concurrency caps |
+| Brute force/abuse | Neon Auth controls, route rate limits, request size and concurrency caps |
 | Secret exposure | Server-only env, hosting secret store, log redaction, no NEXT_PUBLIC secrets |
 | Webhook forgery | No webhook dependency in MVP; if added later, verify provider signature + timestamp + replay nonce |
 | Financial risk | Simulation-only; no wallet signing, transaction construction or transfer endpoint |
@@ -242,22 +246,23 @@ Health checks:
 
 ## 13. Deployment
 
-- Vercel protected preview for every phase checkpoint.
-- Preview uses a dedicated Supabase project/schema and Walrus namespace where practical; only synthetic/demo data and public wallet address.
+- Vercel protected preview for every phase checkpoint; Vercel Authentication enabled; generated `*.vercel.app` URL; no custom domain.
+- Preview uses a separate Neon project or branch and the `interlock` Walrus namespace; only synthetic/demo data and the public wallet address.
+- Production uses a separate Neon project/branch and the `interlock-prod` Walrus namespace; no preview secrets are copied.
 - Memory baseline feature flag must fail startup validation if enabled for production.
 - No production secrets copied into preview.
-- Production deploy requires intake-recorded explicit authority; default DENIED.
-- Migrations are reviewed and applied through Supabase CLI; never use schema push destructively against production without authorization.
+- Production deploy requires the bounded Phase 9 authority recorded in `OPERATOR_INTAKE.md`; any action outside that list remains DENIED.
+- Migrations are version-controlled and applied through the migration role (`DATABASE_URL_UNPOOLED`, `neondb_owner`); application runtime uses `DATABASE_URL_APP` (`app_user`). Never use schema push destructively against production without authority. A verified backup/rollback path is required before applying production migrations.
 
 ## 14. Fixed stack and version policy
 
 - Next.js 16.x App Router; React 19; TypeScript strict.
 - Tailwind CSS 4; shadcn/ui components; Lucide icon set.
 - Zod for runtime contracts.
-- Supabase Postgres/Auth + `@supabase/ssr`.
-- Walrus SDK `@mysten-incubation/memwal`; inspect actual current package docs and pin verified version at implementation.
+- Neon Postgres + Managed Better Auth + `@neon/auth/next/server` (verify/pin exact package version at implementation); plain PostgreSQL RLS with `app_user` (`NOBYPASSRLS`) and separately privileged migrations.
+- Walrus SDK `@mysten-incubation/memwal`; Phase 0 verified `0.1.14`; pin the exact tested version at implementation.
 - Tatum Sui gRPC via `@grpc/grpc-js`, `@grpc/proto-loader`, official Sui API protobuf definitions pinned at immutable release/commit.
-- OpenAI Responses API + Structured Outputs for Analyst only; model set by intake after account access confirmation.
-- Vercel; Vitest, Testing Library, Playwright; Supabase CLI.
+- Groq OpenAI-compatible API with strict JSON-schema structured outputs for Analyst only; confirmed model `qwen/qwen3.8-27b`; no policy authority.
+- Vercel; Vitest, Testing Library, Playwright. Database migrations are version-controlled SQL applied through the Neon migration role; no Supabase CLI.
 
 **Implementation detail — agent may decide:** exact patch versions compatible with the installed ecosystem, file naming, internal component composition and utility package choices. Agent may not change the architecture, major products or trust boundaries without a genuine incompatibility/security blocker and documented operator escalation.
