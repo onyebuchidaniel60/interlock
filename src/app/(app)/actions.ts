@@ -8,6 +8,7 @@ import { PlanInputSchema, ConstraintInputSchema } from "@/lib/domain/schemas";
 import {
   ServiceError,
   createConstraint,
+  createDemoComparison,
   createObservation,
   createPlan,
   evaluatePlanById,
@@ -137,4 +138,24 @@ export async function simulateDecisionAction(formData: FormData) {
   revalidatePath("/audit");
   revalidatePath("/dashboard");
   redirect(`/decisions/${decisionId}?simulated=1`);
+}
+
+export async function runDemoComparisonAction() {
+  const { user, workspace } = await requireWorkspace();
+  let result: Awaited<ReturnType<typeof createDemoComparison>>;
+  try {
+    result = await createDemoComparison({
+      userId: user.id,
+      workspaceId: workspace.id,
+      role: workspace.role,
+    });
+  } catch (error) {
+    fail("/demo", error);
+  }
+
+  revalidatePath("/demo");
+  revalidatePath("/dashboard");
+  revalidatePath("/memory");
+  revalidatePath("/audit");
+  redirect(`/demo?planId=${encodeURIComponent(result.planId)}&decisionId=${encodeURIComponent(result.decisionId)}`);
 }

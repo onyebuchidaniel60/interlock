@@ -647,8 +647,7 @@ export async function evaluatePlanById(actor: Actor, planId: string) {
   };
 }
 
-export async function simulateDecision(actor: Actor, decisionId: string) {
-  assertCanWrite(actor.role);
+export async function simulateDecision(actor: Actor, decisionId: string) {  assertCanWrite(actor.role);
   const decision = await withUser(actor.userId, async (client) => {
     const result = await client.query<DecisionRow>(
       `select d.*, p.status as plan_status, m.walrus_blob_id as verdict_blob_id, m.content_hash as verdict_hash
@@ -720,4 +719,45 @@ export async function simulateDecision(actor: Actor, decisionId: string) {
   if (!execution) throw new ServiceError("SIMULATION_FAILED", "The simulation record was not created.", 500);
 
   return { executionId: execution, decisionId, planHash: decision.plan_hash, simulatedAt, mode: "SIMULATION" as const };
+}
+
+/**
+ * Preview-only demo harness. It uses one observation and one immutable plan for
+ * both branches. The baseline is an explicitly labelled illustrative result and
+ * creates no decision record or clearance.
+ */
+export async function createDemoComparison(actor: Actor) {
+  if (process.env.INTERLOCK_DEMO_BASELINE_ENABLED !== "true") {
+    throw new ServiceError("DEMO_DISABLED", "The demo baseline is disabled.", 403);
+  }
+  const address = process.env.SUI_DEMO_ADDRESS;
+  if (!address) throw new ServiceError("DEMO_ADDRESS_MISSING", "The demo address is not configured.", 500);
+
+  const observation = await createObservation(actor, address);
+  const constraint = await createConstraint(actor, {
+    address,
+    maxExposureBps: 1000,
+    description: "Demo policy: maximum simulated exposure is 10% of the verified balance.",
+  });
+  const plan = await createPlan(actor, {
+    observationId: observation.observationId,
+    amountMist: "100000000",
+    exposureBps: 1500,
+    rationale: "Demo comparison: same 15% plan, unguarded baseline vs protected Sentinel.",
+  });
+  const protectedDecision = await evaluatePlanById(actor, plan.planId);
+
+  return {
+    observationId: observation.observationId,
+    constraintId: constraint.recordId,
+    planId: plan.planId,
+    planHash: protectedDecision.planHash,
+    decisionId: protectedDecision.decisionId,
+    baseline: {
+      label: "Unguarded baseline",
+      verdict: "WOULD_PASS",
+      note: "Illustrative branch only: no policy recall and no protected decision. It is not an execution.",
+    },
+    protected: protectedDecision,
+  };
 }
