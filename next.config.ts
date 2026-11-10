@@ -22,6 +22,9 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },
+  outputFileTracingIncludes: {
+    "/*": ["./proto/**/*"],
+  },
 };
 
 export default nextConfig;
