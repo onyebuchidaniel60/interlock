@@ -1,7 +1,7 @@
 import path from "node:path";
 
-import grpc from "@grpc/grpc-js";
-import protoLoader from "@grpc/proto-loader";
+import * as grpc from "@grpc/grpc-js";
+import * as protoLoader from "@grpc/proto-loader";
 
 import { hashCanonical } from "@/lib/domain/canonical";
 

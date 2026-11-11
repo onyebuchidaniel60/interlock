@@ -81,7 +81,7 @@ Test pure domain logic without database/network:
 
 ## Acceptance/test evidence
 
-Every test command, environment and result must be recorded in `docs/BUILD_LOG.md`; failed tests include cause and retest evidence. Never mark tests passed if skipped. If external provider tests cannot run, label them blocked/not verified and do not claim core integration complete.
+Every test command, environment and result must be recorded in `BUILD_LOG.md`; failed tests include cause and retest evidence. Never mark tests passed if skipped. If external provider tests cannot run, label them blocked/not verified and do not claim core integration complete.
 
 ## Functionality gate before visual refinement
 

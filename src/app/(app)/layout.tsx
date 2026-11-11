@@ -7,7 +7,7 @@ import { requireWorkspace } from "@/lib/workspace";
 export const dynamic = "force-dynamic";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
-  readRuntimeConfig();
+  const config = readRuntimeConfig();
   const { user, workspace } = await requireWorkspace();
   return (
     <AppShell
@@ -15,6 +15,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       workspaceRole={workspace.role}
       userName={user.name ?? user.email}
       userEmail={user.email}
+      environment={config.INTERLOCK_ENVIRONMENT}
     >
       {children}
     </AppShell>

@@ -22,7 +22,7 @@ Changes:
   - Recorded bounded production authority, $0 unapproved spend, data/demo/redaction/TTS/GitHub/legal rules.
   - Inspected four operator-owned reference images in design/reference/ and recorded paths, dimensions, SHA-256 and design observations.
   - Added .gitignore for env files, node_modules, .next, .vercel, coverage, logs and local artifacts.
-  - Updated ARCHITECTURE.md, docs/CONFIGURATION.md, docs/TESTING.md and AI_HANDOFF.md for Neon/Groq.
+  - Updated ARCHITECTURE.md, CONFIGURATION.md, TESTING.md and AI_HANDOFF.md for Neon/Groq.
   - Updated remaining affected docs to remove stale Supabase/OpenAI fixed-stack references.
   - No application code, scaffold, dependency install in the repository, database connection, deployment or provider call beyond the two authorized smoke tests.
 Commands run:
@@ -371,7 +371,7 @@ Changes:
   - Refined shell labels, workspace identity, footer and live-status copy.
   - Constrained table scroll containers and panel min-widths to eliminate responsive overflow.
   - Verified all authenticated data pages at 390, 768 and 1280 px.
-  - Added StageShow/design decisions to docs/DESIGN_NOTES.md.
+  - Added StageShow/design decisions to DESIGN_NOTES.md.
 Commands:
   - E2E_AUTH_STATE=<local> npm run test:e2e -- tests/e2e/responsive-auth.spec.ts (6/6)
   - E2E_AUTH_STATE=<local> npm run test:e2e -- tests/e2e/auth.spec.ts (6/6)

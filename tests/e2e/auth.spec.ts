@@ -32,7 +32,7 @@ test.describe("authenticated workspace", () => {
   test("observations, memory and plans expose verified live data", async ({ page }) => {
     await page.goto("/observations", { waitUntil: "domcontentloaded", timeout: 45_000 });
     await expect(page.getByRole("heading", { level: 1, name: "Chain observations" })).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByRole("button", { name: "Run Scout" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "New Observation" })).toBeVisible();
     await expect(page.getByText("Observation history")).toBeVisible();
 
     await page.goto("/memory", { waitUntil: "domcontentloaded", timeout: 45_000 });

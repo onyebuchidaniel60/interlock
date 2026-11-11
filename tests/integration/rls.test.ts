@@ -51,7 +51,7 @@ describe.skipIf(!connectionString)("Neon RLS integration", () => {
         "select count(*)::int as count from public.agent_identities",
       );
       expect(ownMembers.rows[0]?.count).toBe(1);
-      expect(ownAgents.rows[0]?.count).toBe(4);
+      expect(ownAgents.rows[0]?.count).toBe(5);
 
       const role = await client.query<{ role: string }>(
         "select public.app_workspace_role($1) as role",

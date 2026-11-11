@@ -57,7 +57,7 @@ Production is allowed only after every Phase 9 condition passes:
 
 ## Release evidence
 
-Record URL, commit, environment, migration versions, smoke tests, security results, known issues and rollback steps in `AI_HANDOFF.md` and `docs/BUILD_LOG.md`.
+Record URL, commit, environment, migration versions, smoke tests, security results, known issues and rollback steps in `AI_HANDOFF.md` and `BUILD_LOG.md`.
 
 ## Production (live)
 

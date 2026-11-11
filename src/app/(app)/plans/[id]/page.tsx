@@ -16,7 +16,7 @@ export const maxDuration = 60;
 
 const errors: Record<string, string> = {
   PLAN_NOT_FOUND: "The plan was not found.",
-  OBSERVATION_STALE: "The observation is stale. Run Scout again before evaluating.",
+  OBSERVATION_STALE: "The observation is stale. Run New Observation again before evaluating.",
   NO_POLICY: "No applicable policy exists; Sentinel will hold.",
   UNEXPECTED: "The evaluation could not be completed.",
 };
@@ -107,7 +107,7 @@ export default async function PlanDetailPage({
             <form action={evaluatePlanAction} className="mt-4">
               <input type="hidden" name="planId" value={plan.id} />
               <SubmitButton pendingLabel="Verifying evidence + writing VERDICT…">
-                {expired ? "Evaluate anyway (expiry will HOLD)" : "Evaluate with Sentinel"}
+                {expired ? "Evaluate anyway (expiry will HOLD)" : "Request Check"}
               </SubmitButton>
             </form>
             <p className="mt-3 text-[10px] leading-5 text-faint">

@@ -20,19 +20,19 @@ This package is a design/handoff artifact only. It contains no implemented app c
 
 ## Supporting docs
 
-- `docs/SETUP.md`
-- `docs/CONFIGURATION.md`
-- `docs/CONFIGURATION_ENV_TEMPLATE.md`
-- `docs/TESTING.md`
-- `docs/DEPLOYMENT.md`
-- `docs/TROUBLESHOOTING.md`
-- `docs/DESIGN_NOTES.md`
-- `docs/OPERATOR_GUIDE.md`
-- `docs/API.md`
-- `docs/DATA_MODEL.md`
-- `docs/REPOSITORY_STRUCTURE.md`
-- `docs/EXTERNAL_INTEGRATION_NOTES.md`
-- `docs/BUILD_LOG.md`
+- `SETUP.md`
+- `CONFIGURATION.md`
+- `CONFIGURATION_ENV_TEMPLATE.md`
+- `TESTING.md`
+- `DEPLOYMENT.md`
+- `TROUBLESHOOTING.md`
+- `DESIGN_NOTES.md`
+- `OPERATOR_GUIDE.md`
+- `API.md`
+- `DATA_MODEL.md`
+- `REPOSITORY_STRUCTURE.md`
+- `EXTERNAL_INTEGRATION_NOTES.md`
+- `BUILD_LOG.md`
 
 ## Important status
 

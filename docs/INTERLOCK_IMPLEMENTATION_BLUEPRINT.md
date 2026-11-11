@@ -14,8 +14,8 @@
 4. `AGENTS.md` — persistent implementation-agent instructions.
 5. `OPERATOR_INTAKE.md` — one-time inputs and bounded authorization.
 6. `REFERENCE_ASSETS.md` — actual UI asset inventory; currently pending operator intake.
-7. `AI_HANDOFF.md` and `docs/BUILD_LOG.md` — live implementation state and evidence.
-8. `docs/API.md`, `docs/DATA_MODEL.md` — endpoint and persistence contracts.
+7. `AI_HANDOFF.md` and `BUILD_LOG.md` — live implementation state and evidence.
+8. `API.md`, `DATA_MODEL.md` — endpoint and persistence contracts.
 
 The uploaded `PROPER_VIBE_CODING_WORKFLOW_AUTONOMOUS.md` is the governing methodology. The implementation agent must preserve its order: **complete intake → early skeletal preview → core functionality → end-to-end verification → reference-image-led UI → frontend/docs completeness → demo video → final regression and authorized release**.
 
@@ -95,7 +95,7 @@ The baseline is not a production mode or a Sentinel bypass. In normal Interlock 
 
 ## 6. Primary flows
 
-Detailed preconditions, writes, failure modes, permissions and acceptance criteria are in `PROJECT_SPEC.md`; process contracts are in `docs/API.md` and `docs/DATA_MODEL.md`.
+Detailed preconditions, writes, failure modes, permissions and acceptance criteria are in `PROJECT_SPEC.md`; process contracts are in `API.md` and `DATA_MODEL.md`.
 
 ### Observe and remember
 Operator → Scout → Tatum gRPC read → normalize exact integer balance → persist observation → submit FACT to Walrus → wait for completed job/blob ID → list metadata → recall/verify content → mark memory active.
@@ -171,7 +171,7 @@ All routes need permission-aware navigation and appropriate loading, empty, vali
 
 ## 13. Security posture
 
-MVP is simulation-only and fail-closed. No real execution endpoint or wallet signing exists. Enforce Neon RLS with `app_user` (`NOBYPASSRLS`) and server-side workspace authorization; validate all external and user inputs; constrain outbound network access; verify Walrus provenance and content hashes; enforce exact policy semantics; rate-limit expensive operations; redact secrets; make memory and audit changes append-only; protect Runner with one-time signed clearances and atomic DB consumption. See `ARCHITECTURE.md` and `docs/TESTING.md` for the threat controls and test cases.
+MVP is simulation-only and fail-closed. No real execution endpoint or wallet signing exists. Enforce Neon RLS with `app_user` (`NOBYPASSRLS`) and server-side workspace authorization; validate all external and user inputs; constrain outbound network access; verify Walrus provenance and content hashes; enforce exact policy semantics; rate-limit expensive operations; redact secrets; make memory and audit changes append-only; protect Runner with one-time signed clearances and atomic DB consumption. See `ARCHITECTURE.md` and `TESTING.md` for the threat controls and test cases.
 
 ## 14. Autonomous implementation sequence
 
@@ -186,7 +186,7 @@ MVP is simulation-only and fail-closed. No real execution endpoint or wallet sig
 9. Phase 8: capture and edit <=180-second demo video; review the rendered file.
 10. Phase 9: final regression/security; release only within explicit authority.
 
-No routine phase approval stops. Each checkpoint is test → inspect → fix → commit → update `AI_HANDOFF.md` and `docs/BUILD_LOG.md` → continue. Stop only for a genuine blocker or an action outside exact authority.
+No routine phase approval stops. Each checkpoint is test → inspect → fix → commit → update `AI_HANDOFF.md` and `BUILD_LOG.md` → continue. Stop only for a genuine blocker or an action outside exact authority.
 
 ## 15. Operator intake status
 
@@ -223,11 +223,11 @@ The coding agent must not ask one question at a time or repeat information alrea
 
 ## 18. Recommended repository structure
 
-See `docs/REPOSITORY_STRUCTURE.md` for the full proposed Next.js/Neon tree. Preserve existing repository conventions when compatible; keep the MVP as one modular application, not separate microservices.
+See `REPOSITORY_STRUCTURE.md` for the full proposed Next.js/Neon tree. Preserve existing repository conventions when compatible; keep the MVP as one modular application, not separate microservices.
 
 ## 19. Environment configuration
 
-See `docs/CONFIGURATION.md` and `docs/CONFIGURATION_ENV_TEMPLATE.md`. Client-safe variables are limited to the public app URL and any genuinely public monitoring DSN. Walrus delegate keys, Tatum/Groq keys, Neon URLs/secrets, signing secrets and auth cookie secrets remain server-only. Application queries use `DATABASE_URL_APP` (`app_user`, `NOBYPASSRLS`); `DATABASE_URL_UNPOOLED` is migration-only.
+See `CONFIGURATION.md` and `CONFIGURATION_ENV_TEMPLATE.md`. Client-safe variables are limited to the public app URL and any genuinely public monitoring DSN. Walrus delegate keys, Tatum/Groq keys, Neon URLs/secrets, signing secrets and auth cookie secrets remain server-only. Application queries use `DATABASE_URL_APP` (`app_user`, `NOBYPASSRLS`); `DATABASE_URL_UNPOOLED` is migration-only.
 
 ## 20. Final pre-implementation audit
 
@@ -235,9 +235,9 @@ See `docs/CONFIGURATION.md` and `docs/CONFIGURATION_ENV_TEMPLATE.md`. Client-saf
 - [x] Primary and secondary flows include success/failure behavior and permissions.
 - [x] Functional requirements and testable acceptance criteria are specified in `PROJECT_SPEC.md`.
 - [x] States, transitions, TTLs, conflicts, immutability and cancellation/supersession rules are explicit.
-- [x] Data entities, relationships, indexes, ownership and sensitive fields are specified in `docs/DATA_MODEL.md`.
+- [x] Data entities, relationships, indexes, ownership and sensitive fields are specified in `DATA_MODEL.md`.
 - [x] Architecture, trust boundaries, technology stack and integration failure behavior are fixed in `ARCHITECTURE.md`.
-- [x] API endpoints, auth, request/response and error semantics are specified in `docs/API.md`.
+- [x] API endpoints, auth, request/response and error semantics are specified in `API.md`.
 - [x] Authentication, RLS, permissions, Runner clearance and threat mitigations are specified.
 - [x] UI routes and states are specified; no separate mockup/approval phase.
 - [ ] Actual UI reference image(s) inspected — pending Phase 0; none supplied yet.

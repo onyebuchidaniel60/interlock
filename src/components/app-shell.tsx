@@ -199,12 +199,14 @@ export function AppShell({
   workspaceRole,
   userName,
   userEmail,
+  environment,
 }: {
   children: ReactNode;
   workspaceName: string;
   workspaceRole: string;
   userName: string;
   userEmail: string;
+  environment: string;
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -336,7 +338,7 @@ export function AppShell({
               </div>
               <div className="ml-auto flex items-center gap-2">
                 <Badge tone="accent" dot>
-                  Preview
+                  {environment === "production" ? "Live" : "Preview"}
                 </Badge>
               </div>
             </div>
@@ -352,7 +354,7 @@ export function AppShell({
           <footer className="border-t border-line px-4 py-5 md:px-8">
             <div className="mx-auto flex w-full max-w-[1500px] flex-col gap-3 text-[11px] text-faint sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p>Interlock is a decision audit tool. Execution is simulated.</p>
+                <p className="font-serif italic">Interlock is a decision audit tool. Execution is simulated.</p>
                 <p className="mt-1 text-faint">No custody, signing, transfers or trades.</p>
               </div>
               <div className="flex flex-wrap items-center gap-4">

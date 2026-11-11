@@ -4,7 +4,7 @@
 You are the autonomous implementation engineer for **Interlock**. The operator and this blueprint own product, architecture, business and security decisions. Implement the agreed product; do not independently redesign it, expand scope or replace the stack.
 
 ## Source of truth
-Read these before changing code: `INTERLOCK_IMPLEMENTATION_BLUEPRINT.md`, `PROJECT_SPEC.md`, `ARCHITECTURE.md`, `IMPLEMENTATION_PLAN.md`, `OPERATOR_INTAKE.md`, `REFERENCE_ASSETS.md`, plus repository-local instructions. `PROJECT_SPEC.md` owns behavior and scope; `ARCHITECTURE.md` owns architecture/security; `IMPLEMENTATION_PLAN.md` owns phase order. Record any genuine conflict in `AI_HANDOFF.md`; do not silently resolve a material conflict by changing the product.
+Read these before changing code: `docs/INTERLOCK_IMPLEMENTATION_BLUEPRINT.md`, `docs/PROJECT_SPEC.md`, `docs/ARCHITECTURE.md`, `docs/IMPLEMENTATION_PLAN.md`, `docs/OPERATOR_INTAKE.md`, `docs/REFERENCE_ASSETS.md`, plus repository-local instructions. `docs/PROJECT_SPEC.md` owns behavior and scope; `docs/ARCHITECTURE.md` owns architecture/security; `docs/IMPLEMENTATION_PLAN.md` owns phase order. Record any genuine conflict in `docs/AI_HANDOFF.md`; do not silently resolve a material conflict by changing the product.
 
 ## Intake before code
 1. Inspect the repository and existing work without modifying it.
@@ -14,7 +14,7 @@ Read these before changing code: `INTERLOCK_IMPLEMENTATION_BLUEPRINT.md`, `PROJE
 5. Never print secret values or commit `.env` files. Keep an exact record of authority boundaries.
 
 ## Autonomous execution
-Execute Phases 1–9 sequentially after readiness. No routine phase review, mockup approval or “shall I continue?” prompts. At each checkpoint: implement, test, inspect, fix, commit, update `AI_HANDOFF.md` and `docs/BUILD_LOG.md`, then continue. Resume from Git state and handoff after context loss; do not redo completed work without reason.
+Execute Phases 1–9 sequentially after readiness. No routine phase review, mockup approval or “shall I continue?” prompts. At each checkpoint: implement, test, inspect, fix, commit, update `docs/AI_HANDOFF.md` and `docs/BUILD_LOG.md`, then continue. Resume from Git state and handoff after context loss; do not redo completed work without reason.
 
 Stop only for real blockers: indispensable missing credential/permission/dependency with no safe fallback, serious security/data-loss risk, cost/scope excess, environment outage that blocks all safe work, or an action outside exact authority. Report evidence, completed/unaffected work and minimum operator action. Continue all unaffected safe work.
 
@@ -49,7 +49,7 @@ Stop only for real blockers: indispensable missing credential/permission/depende
 - Use operator-supplied reference image(s) to implement the real UI directly. No separate mockup/prototype/approval phase. Do not pretend absent images exist.
 - At Phase 6 attempt `npx skills add benjitaylor/skills --skill stageshow`; inspect and apply relevant guidance. If it fails, record evidence and continue. Additional UI skills are optional and must be trustworthy, relevant and conflict-free.
 - Create an original interface; do not copy protected logos, proprietary assets, third-party text or trade dress.
-- Record asset paths and design decisions in `REFERENCE_ASSETS.md` and `docs/DESIGN_NOTES.md`.
+- Record asset paths and design decisions in `docs/REFERENCE_ASSETS.md` and `docs/DESIGN_NOTES.md`.
 
 ## Quality requirements
 - Complete loading, empty, validation, success, failure, permission-denied, not-found and degraded states.
@@ -68,11 +68,11 @@ Stop only for real blockers: indispensable missing credential/permission/depende
 
 ## Git and handoff
 Use small meaningful commits. Do not rewrite unrelated history or overwrite operator work. At every checkpoint update:
-- `AI_HANDOFF.md` — phase, preview URL/commit, tests, issue list, next task, authorization.
+- `docs/AI_HANDOFF.md` — phase, preview URL/commit, tests, issue list, next task, authorization.
 - `docs/BUILD_LOG.md` — changes, commands, evidence, failures, fixes and commits.
-- `OPERATOR_INTAKE.md` — validated inputs and authority.
-- `REFERENCE_ASSETS.md` / `docs/DESIGN_NOTES.md` — exact assets and UI interpretation.
-- `DEMO_VIDEO_PLAN.md` — status and outputs.
+- `docs/OPERATOR_INTAKE.md` — validated inputs and authority.
+- `docs/REFERENCE_ASSETS.md` / `docs/DESIGN_NOTES.md` — exact assets and UI interpretation.
+- `docs/DEMO_VIDEO_PLAN.md` — status and outputs.
 
 ## Implementation detail — agent may decide
 The agent may choose patch versions, internal component decomposition, naming conventions and non-architectural implementation details when compatible with the fixed stack and lockfile. It may not change product scope, trust boundaries, database ownership model, provider choices, auth model, execution mode or phase order without a genuine blocker and documented operator decision.

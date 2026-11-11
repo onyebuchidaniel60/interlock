@@ -1,6 +1,6 @@
 # CONFIGURATION.md — Environment Variables and Secret Handling
 
-Never commit real values. `.env.example` / `docs/CONFIGURATION_ENV_TEMPLATE.md` contain names and safe placeholders only. All secrets are server-only. Any variable prefixed `NEXT_PUBLIC_` is browser-visible; it may contain only genuinely public values (for example the canonical app URL), never credentials.
+Never commit real values. `.env.example` / `CONFIGURATION_ENV_TEMPLATE.md` contain names and safe placeholders only. All secrets are server-only. Any variable prefixed `NEXT_PUBLIC_` is browser-visible; it may contain only genuinely public values (for example the canonical app URL), never credentials.
 
 ## Environment variables
 

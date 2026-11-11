@@ -5,14 +5,17 @@ import { auth } from "@/lib/auth/server";
 const handler = auth.handler();
 
 const configuredOrigins = [
-  process.env.APP_BASE_URL,
-  process.env.NEXT_PUBLIC_APP_BASE_URL,
-  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
-  process.env.VERCEL_BRANCH_URL ? `https://${process.env.VERCEL_BRANCH_URL}` : undefined,
+  "https://interlock-recall.vercel.app",
+  "https://interlock-recall-uhhh2.vercel.app",
+  "https://interlock-jet.vercel.app",
   "http://localhost:3000",
   "http://127.0.0.1:3000",
   "http://localhost:3127",
   "http://127.0.0.1:3127",
+  process.env.APP_BASE_URL,
+  process.env.NEXT_PUBLIC_APP_BASE_URL,
+  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
+  process.env.VERCEL_BRANCH_URL ? `https://${process.env.VERCEL_BRANCH_URL}` : undefined,
 ]
   .filter((value): value is string => Boolean(value))
   .map((value) => {
@@ -47,8 +50,11 @@ async function handle(request: NextRequest, context: RouteContext) {
   const headers = new Headers(request.headers);
   // Neon Auth validates the upstream Origin. The proxy validates the browser
   // Origin against the exact app allowlist first, then presents the auth
-  // server's own origin to the managed service.
+  // server's own origin to the managed service. Preserve the original host as
+  // diagnostic metadata without making it the upstream Host header.
   headers.set("origin", new URL(process.env.NEON_AUTH_BASE_URL!).origin);
+  const appHost = request.headers.get("host");
+  if (appHost) headers.set("x-forwarded-host", appHost);
   headers.delete("host");
 
   const body = request.method === "GET" || request.method === "HEAD" ? undefined : await request.text();

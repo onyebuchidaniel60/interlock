@@ -1,31 +1,29 @@
 # Interlock
 
-Interlock is a decision audit tool that lets one agent's verified Walrus Memory discovery deterministically block another agent from taking a policy-violating action. Tatum supplies a read-only Sui observation, Sentinel verifies every cited Walrus record and returns APPROVE / REJECT / HOLD, and Runner records a simulation only after a final approved decision has a completed, recalled VERDICT memory.
-
 ## Quick Start — Try It Now
 
 **Live production:** <https://interlock-recall.vercel.app>
 
-**Access:** public. Create an account at `/setup`, then create a workspace; no demo credentials are published. Use `interlock-recall.vercel.app` for submission — **do not use `interlock.vercel.app`**, which belongs to an unrelated app.
+**Demo login:** `demo@interlock.dev` / `InterlockDemo2026!`
 
-The preview-only `/demo` comparison returns **404** in production. The video and protected preview retain the comparison harness.
+**Demo role:** OWNER of **Interlock Demo Workspace** (pre-seeded observation, 10% policy, REJECT and APPROVE examples).
 
-### The exact click path (about 2–3 minutes)
+> Use `interlock-recall.vercel.app` for submission. Do **not** use `interlock.vercel.app`, which belongs to an unrelated app. The `/demo` comparison route returns 404 in production; it remains in the protected preview and demo video.
+
+### See the core safety decision in four steps
 
 | Step | Action | Expected outcome |
 |---|---|---|
-| 1 | Open `/setup`, create an account, then create a workspace (or sign in at `/login`) | Workspace dashboard loads with the real workspace and OWNER role. |
-| 2 | Open **Observations** → **Run Scout** with the funded public SUI address prefilled | Tatum returns a non-zero balance; a FACT is written to Walrus and verified by recall. |
-| 3 | Open **Settings** → **Exposure policy**; keep/record `1000` bps and submit | A verified `MAX_EXPOSURE_BPS` CONSTRAINT appears as active. |
-| 4 | Open **Plans → Create plan**; amount `100000000` MIST, exposure `1500` bps, submit | An immutable plan hash is created. |
-| 5 | Open the plan → **Evaluate with Sentinel** | The decision returns **REJECT** with reason `EXPOSURE_BPS_EXCEEDED`. |
-| 6 | Open the decision → **Cited evidence** | The FACT and CONSTRAINT are marked VERIFIED with Walrus blob IDs, hashes and authors. |
-| 7 | Copy a blob/hash or open the **Tatum anchor** panel | Provenance labels show the exact observation, provider, method, balance and timestamp. |
-| 8 | Open **Audit trail** | A `DECISION_FINALIZED` event is present with the verdict, reason code and plan hash. |
+| 1 | Open `/login` and sign in with the demo credentials | **Interlock Demo Workspace** dashboard loads with OWNER role. |
+| 2 | Click **New Observation** (runs Scout against the funded public Sui address) | Tatum returns a non-zero balance; a FACT is written to Walrus and verified by recall in about 15–40 seconds. |
+| 3 | Open **Plans → New Plan**; amount `100000000` MIST, exposure `1500` bps; submit | An immutable plan hash is created for 15% exposure. |
+| 4 | Open the plan → **Request Check** | Deterministic **REJECT** with reason `EXPOSURE_BPS_EXCEEDED`, citing the verified 10% CONSTRAINT and the live FACT. |
 
-A compliant `500` bps plan reaches **APPROVE** and exposes **Simulate once**; after one simulation the control is replaced by the execution record and replay returns `ALREADY_SIMULATED`. A missing policy, stale observation, incomplete recall or unverified record returns **HOLD**.
+On the decision page, open **Cited evidence** to see Walrus blob IDs, SHA-256 hashes, authors, verification status and copy buttons. The **Tatum anchor** panel shows provider, method, balance and observation ID. A compliant `500` bps plan reaches **APPROVE** and exposes **Simulate once**; replay returns `ALREADY_SIMULATED`. Missing policy, stale evidence or failed recall returns **HOLD**. Execution is simulated; no funds move.
 
-If you prefer a local run, follow **Development** below. The product is simulation-only: no funds move, no wallet is connected and no transaction is submitted. If a Vercel Security Checkpoint appears, complete the browser check and retry.
+## Product summary
+
+Interlock is a decision audit tool that lets one agent's verified Walrus Memory discovery deterministically block another agent from taking a policy-violating action. Tatum supplies a read-only Sui observation, Sentinel verifies every cited Walrus record and returns APPROVE / REJECT / HOLD, and Runner records a simulation only after a final approved decision has a completed, recalled VERDICT memory.
 
 ## Architecture
 
@@ -115,8 +113,8 @@ Common failures and root causes: `docs/TROUBLESHOOTING.md`.
 - `docs/OPERATOR_GUIDE.md` — operator flow matching this Quick Start.
 - `docs/DESIGN_NOTES.md` — reference-led visual decisions.
 - `docs/BUILD_LOG.md` — phase-by-phase evidence.
-- `AI_HANDOFF.md` — current commit, tests and outstanding blockers.
-- `PROJECT_SPEC.md` / `ARCHITECTURE.md` — product and architecture source of truth.
+- `docs/AI_HANDOFF.md` — current commit, tests and outstanding blockers.
+- `docs/PROJECT_SPEC.md` / `docs/ARCHITECTURE.md` — product and architecture source of truth.
 
 ## Demo video
 

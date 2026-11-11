@@ -37,7 +37,7 @@ function getClient(agent: AgentType) {
   if (!accountId || !serverUrl || !key) {
     throw new Error(`Walrus Memory configuration is incomplete for ${agent}.`);
   }
-  return MemWal.create({ key, accountId, serverUrl, namespace: getNamespace() });
+  return MemWal.create({ key, accountId, serverUrl, namespace: getNamespace(), recallTimeoutMs: 30_000 });
 }
 
 function createClient(agent: AgentType) {

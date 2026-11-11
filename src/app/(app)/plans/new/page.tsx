@@ -59,7 +59,7 @@ export default async function NewPlanPage({
             description="Scout must record a Tatum balance and verify its Walrus FACT before a plan can reference it."
             action={
               <ButtonLink href="/observations" variant="secondary">
-                Run Scout first
+                New Observation first
               </ButtonLink>
             }
           />
@@ -130,7 +130,7 @@ export default async function NewPlanPage({
               ) : null}
 
               <div className="flex flex-wrap items-center gap-3">
-                <SubmitButton pendingLabel="Creating immutable plan…">Create plan</SubmitButton>
+                <SubmitButton pendingLabel="Creating immutable plan…">New Plan</SubmitButton>
                 <Link href="/plans" className="text-[11px] text-muted hover:text-ink">
                   Cancel
                 </Link>

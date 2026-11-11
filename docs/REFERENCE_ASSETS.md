@@ -77,4 +77,4 @@ No logo, icon, font file, illustration or product screenshot was supplied. Creat
 - Commit the four reference images under `design/reference/` as supplied.
 - Do not alter the originals. Derived crops may be created for design study only and must not be shipped as product assets.
 - Record any additional operator-supplied asset here before use.
-- At Phase 6, attempt `npx skills add benjitaylor/skills --skill stageshow`, inspect the guidance, and record the result in `docs/BUILD_LOG.md`. If it fails, continue with the design system and accessibility practices above.
+- At Phase 6, attempt `npx skills add benjitaylor/skills --skill stageshow`, inspect the guidance, and record the result in `BUILD_LOG.md`. If it fails, continue with the design system and accessibility practices above.

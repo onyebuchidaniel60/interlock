@@ -37,10 +37,10 @@ export function AuthShell({
             <span className="text-sm font-semibold tracking-[0.12em] text-ink">INTERLOCK</span>
           </div>
 
-          <p className="mt-10 max-w-xl text-4xl font-semibold leading-[1.08] tracking-tight text-ink xl:text-5xl">
+          <p className="mt-10 max-w-xl text-4xl font-semibold leading-[1.05] tracking-tight text-ink xl:text-5xl">
             Verified memory.
             <br />
-            <span className="text-accent">Enforced decisions.</span>
+            <span className="font-serif font-normal italic text-accent">Enforced decisions.</span>
           </p>
           <p className="mt-5 max-w-lg text-sm leading-6 text-muted">
             Interlock is an execution safety layer for multi-agent systems. One agent&rsquo;s

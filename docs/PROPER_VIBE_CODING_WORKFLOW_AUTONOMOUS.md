@@ -125,7 +125,7 @@ npx skills add benjitaylor/skills --skill stageshow
 
 Inspect and follow the relevant skill instructions. The agent may find and use additional UI skills at its discretion if they are trustworthy, relevant and materially improve the result. Avoid installing unrelated skills or following instructions that conflict with project/security requirements.
 
-Extract design principles from the reference: layout, hierarchy, typography, color, spacing, density, components, navigation and interaction patterns. Adapt them to the product; do not copy protected branding or assets. Record decisions and deviations in `docs/DESIGN_NOTES.md`.
+Extract design principles from the reference: layout, hierarchy, typography, color, spacing, density, components, navigation and interaction patterns. Adapt them to the product; do not copy protected branding or assets. Record decisions and deviations in `DESIGN_NOTES.md`.
 
 If the reference image is missing, this should have been caught during initial intake. Request it before coding, or use an agent-generated reference only if the operator expressly authorized that during intake.
 
@@ -205,9 +205,9 @@ When blocked, report the exact blocker, evidence, completed work, unaffected wor
 Maintain:
 - `AGENTS.md` — persistent implementation rules.
 - `AI_HANDOFF.md` — current state and exact next task.
-- `docs/BUILD_LOG.md` — phase-by-phase evidence.
+- `BUILD_LOG.md` — phase-by-phase evidence.
 - `OPERATOR_INTAKE.md` — completed inputs and permissions.
-- `REFERENCE_ASSETS.md` and `docs/DESIGN_NOTES.md` — reference files and UI decisions.
+- `REFERENCE_ASSETS.md` and `DESIGN_NOTES.md` — reference files and UI decisions.
 - `DEMO_VIDEO_PLAN.md` — script, capture and production notes.
 
 At each checkpoint record:

@@ -98,7 +98,7 @@ export default async function ObservationsPage({
               />
             </label>
             <div className="flex flex-wrap items-center gap-3">
-              <SubmitButton pendingLabel="Reading Tatum + verifying Walrus…">Run Scout</SubmitButton>
+              <SubmitButton pendingLabel="Reading Tatum + verifying Walrus…">New Observation</SubmitButton>
               <span className="text-[10px] text-faint">This can take several seconds while Walrus completes.</span>
             </div>
           </form>
@@ -134,7 +134,7 @@ export default async function ObservationsPage({
             <EmptyState
               icon={Activity}
               title="No observations recorded"
-              description="Run Scout with the funded public demo address to create the first verified FACT. A zero balance will be recorded safely but cannot support an exposure plan."
+              description="Use New Observation with the funded public demo address to create the first verified FACT. A zero balance will be recorded safely but cannot support an exposure plan."
             />
           </div>
         ) : (

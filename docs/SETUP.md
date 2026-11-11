@@ -77,7 +77,7 @@ For authenticated E2E, create a Playwright storage state after signing in and se
 - **RLS sees zero rows** — `app.user_id` was not set in the transaction or membership is not ACTIVE.
 - **Walrus write pending/failed** — memory remains PENDING/FAILED, never ACTIVE. Check namespace/delegate/relayer.
 
-See `docs/TROUBLESHOOTING.md` for more.
+See `TROUBLESHOOTING.md` for more.
 
 ## Session behavior and login checks
 
