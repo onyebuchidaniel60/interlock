@@ -8,11 +8,12 @@
 - Repository: `https://github.com/onyebuchidaniel60/interlock`, branch `main`.
 - Phase 4: **`5c03b94`**; Phase 5: **`d141f0c`**; Phase 6: **`a8aa450`**; Phase 7: **`a609b8c`**; Phase 8: **`0fa8015`**; Phase 9 release: **`2ad6646`**; production landing/demo guard: **`11dac78`**; production deployment: **`626d9d1`**.
 - Production URL: **https://interlock-recall.vercel.app**
-- Production deployment ID: **`dpl_CQZGh8Q9FXrr731t2qHGwAafDy5e`**; source commit **`626d9d1`** (production alias follows latest deployment).
+- Production deployment ID: **`dpl_94qLkwPuZVwGL723Rc29gn242oYf`**; source commit **`6058015`** (`feat: final submission polish with demo account and decluttered docs`).
 - Preview: `https://interlock-hud4jt7nr-uhhh2.vercel.app` (Vercel Authentication).
 - Protection: production custom domain is public; preview remains Vercel Authentication. `/demo` returns **404** in production.
 - Neon: production currently uses the provided preview `DATABASE_URL_APP` and `MEMWAL_NAMESPACE=interlock` per explicit operator finalization instruction; this is a shared synthetic data plane, not a separated production branch.
-- Managed Better Auth: real sign-up/sign-in/sign-out, invite links, OWNER/OPERATOR/OBSERVER membership.
+- Managed Better Auth: real sign-up/sign-in/sign-out, invite links, OWNER/OPERATOR/OBSERVER membership. Production auth proxy explicitly allowlists `https://interlock-recall.vercel.app`, the deployment host and localhost; upstream Origin is the Neon Auth origin and `x-forwarded-host` preserves the app host diagnostically.
+- Demo account: **`demo@interlock.dev` / `InterlockDemo2026!`**, OWNER of **Interlock Demo Workspace**, with a seeded observation, 10% policy, REJECT decision, APPROVE decision and one simulation.
 - Tatum: live funded balance observation (`1,212,098,830` MIST at Phase 3 re-check); no checkpoint/finality fabrication.
 - Walrus Memory: signed FACT, CONSTRAINT and VERDICT writes verified by metadata + recall + SHA-256 + author.
 - Sentinel: deterministic; 15% plan REJECTED against verified 10% policy; 5% plan APPROVED; missing evidence HOLDs.
@@ -23,13 +24,13 @@
 
 ## Submission-readiness finalization
 
-- README restructured with a judge-facing one-paragraph summary and Quick Start click path. Production URL is `https://interlock-recall.vercel.app`; `interlock.vercel.app` remains an unrelated app and must not be submitted.
-- UI pass applied StageShow restraint/hierarchy guidance: solid surfaces instead of decorative gradients, removed blur/shadow flourishes, calmer verdict typography with saturated color reserved for badges, constrained tables, intentional empty states, copyable evidence provenance and a Tatum anchor panel.
+- README starts with Quick Start, live production URL, demo credentials and a four-step judge path, followed by architecture/development/configuration/testing/deployment/troubleshooting. Production is `https://interlock-recall.vercel.app`; `interlock.vercel.app` is unrelated and must not be submitted.
+- UI pass applied StageShow restraint/hierarchy guidance: solid surfaces, removed gradients/blur/dashboard decoration, calmer verdict typography, restrained state color, italic serif accents on the focal tagline/footer, copyable forensic evidence, Tatum anchor panel. Labels are now New Observation / New Plan / Request Check.
 - Simulation messaging retained and restyled: persistent footer line, subtle `Execution: simulated · no funds move` chip at the Runner control, no removal of API/evidence/verdict labels.
 - Login behavior exercised end to end: fresh login, reload persistence, logout, login again, cleared-session redirect, and invited OPERATOR account. No architecture-level auth quirk was found; no auth-model change made.
-- Full finalization tests: 14 unit, 7 integration, 10 public shell, 6 authenticated live-data, 6 responsive, session checks and live Memory OFF/ON comparison. `npm audit --omit=dev` 0 vulnerabilities; secret scan clean; security headers verified.
+- Finalization tests: 14 unit; 7 integration (one repeated-load live Walrus recall timed out; adapter timeout raised to 30s and the live pipeline separately passed 3/3); 27 public/auth/responsive/session E2E passed, 9 skipped; demo-account full flow passed locally against the production build (login 3.4s, plan 8.5s, REJECT 51.8s, 9 copy controls); live Memory OFF/ON passed on desktop; audit 0; secret scan clean.
 - Demo video unchanged (approved): `demo/interlock-demo.mp4`, 109.36s.
-- Production was deployed to Vercel project `interlock-recall`; `/demo` is 404; health reports production/simulation/baseline false. Public login is intermittently behind a Vercel Security Checkpoint from the automation IP (browser check required); the app login path itself passed before the challenge and is covered by local/authenticated E2E.
+- Production deployed to Vercel project `interlock-recall`; `/demo` 404; health production/simulation/baseline false. Demo login and live Scout succeeded in production before Vercel Security Checkpoint intermittently challenged this automation IP; the identical production build completed the full demo flow locally. A human browser can complete the checkpoint.
 
 ## Phase 9 final verification
 
@@ -48,7 +49,7 @@
 
 **Deployed.** Vercel project `interlock-recall`; production URL `https://interlock-recall.vercel.app`; deployment `dpl_CQZGh8Q9FXrr731t2qHGwAafDy5e`; `INTERLOCK_ENVIRONMENT=production`, `INTERLOCK_EXECUTION_MODE=simulation`, `INTERLOCK_DEMO_BASELINE_ENABLED=false`, fresh `INTERLOCK_SIGNING_SECRET`, `/demo` 404, public health reports healthy.
 
-**Residual risks / operator notes:** production currently shares the provided preview Neon database and `interlock` Walrus namespace because the finalization instruction required the same `.env.local` values except the listed production flags. This is acceptable only for synthetic hackathon data; separate production Neon/Walrus isolation and a verified backup path are still required before real customer data. Vercel's bot checkpoint can challenge automated traffic; a human browser may need to complete the checkpoint.
+**Residual risks / operator notes:** production shares the provided preview Neon database and `interlock` Walrus namespace per the operator instruction; synthetic hackathon data only. Separate production Neon/Walrus isolation and backup verification remain post-hackathon hardening. Vercel Security Checkpoint can challenge automated traffic; a human browser can complete it. Root docs are now under `docs/` except README/AGENTS.
 
 ## Phase 8 delivered
 

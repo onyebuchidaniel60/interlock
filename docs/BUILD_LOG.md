@@ -520,3 +520,33 @@ Smoke:
 Domain warning: interlock.vercel.app is an unrelated Vercel app and must not be submitted.
 Residual: production shares the provided preview Neon/Walrus synthetic data plane; separate isolation/backup is post-hackathon hardening.
 ```
+
+## Final submission polish and production fix
+
+```text
+Date/time: 2026-11-11T04:50Z
+Commit: 6058015 (feat: final submission polish with demo account and decluttered docs)
+Production URL: https://interlock-recall.vercel.app
+Production deployment: dpl_94qLkwPuZVwGL723Rc29gn242oYf
+Auth fix:
+  - Explicit trusted app origins include https://interlock-recall.vercel.app, deployment host and localhost.
+  - Proxy forwards auth-server Origin and preserves app host as x-forwarded-host; no direct browser-to-Neon Auth calls.
+  - NEON_AUTH_BASE_URL and NEON_AUTH_COOKIE_SECRET confirmed in Production.
+Demo seed:
+  - demo@interlock.dev / InterlockDemo2026! (published intentionally)
+  - OWNER of Interlock Demo Workspace; observation, 10% policy, REJECT, APPROVE and one simulation seeded via real Tatum/Walrus.
+  - Migration 004 ensures new workspaces include the POLICY agent.
+Docs:
+  - Root now contains only README.md and AGENTS.md; other root markdown moved to docs/ with links normalized.
+  - README opens with Quick Start, production URL, demo credentials and four-step judge path.
+UI:
+  - Italic serif focal accents, solid surfaces, restrained verdict color, copyable forensic evidence and Tatum anchor.
+  - New Observation / New Plan / Request Check labels.
+Tests:
+  - 14 unit PASS.
+  - 27 E2E PASS / 9 skipped across shell, authenticated, responsive, session.
+  - Demo-account local production-build flow: login 3.4s, plan 8.5s, REJECT 51.8s, 9 copy controls.
+  - Integration: 6/7 in repeated full run; one live Walrus recall 504/ECONNRESET under load; adapter recall timeout raised to 30s, live pipeline passed 3/3 separately.
+  - Production login + live Scout passed; Vercel Security Checkpoint intermittently challenges automation IP afterward.
+  - /demo 404; health 200 (when not challenged) with production/simulation/baseline false.
+```

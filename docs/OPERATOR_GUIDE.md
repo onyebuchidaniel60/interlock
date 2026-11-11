@@ -1,6 +1,6 @@
 # OPERATOR_GUIDE.md — Interlock MVP Operator Guide
 
-The MVP is a simulation and audit product. It never moves funds or submits a transaction. This guide reflects the implemented Phase 4/5 flows.
+The MVP is a simulation and audit product. It never moves funds or submits a transaction. This guide reflects the implemented production flows. Use the production demo account `demo@interlock.dev` / `InterlockDemo2026!` (OWNER of Interlock Demo Workspace).
 
 ## Roles
 

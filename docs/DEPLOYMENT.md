@@ -62,7 +62,9 @@ Record URL, commit, environment, migration versions, smoke tests, security resul
 ## Production (live)
 
 - URL: `https://interlock-recall.vercel.app` (public; do **not** use `interlock.vercel.app`, which is unrelated).
-- Vercel project: `interlock-recall`; deployment `dpl_CQZGh8Q9FXrr731t2qHGwAafDy5e`; source commit `626d9d1`.
+- Vercel project: `interlock-recall`; deployment `dpl_94qLkwPuZVwGL723Rc29gn242oYf`; source commit `6058015`.
+- Demo account: `demo@interlock.dev` / `InterlockDemo2026!` (OWNER, Interlock Demo Workspace).
+- Auth proxy allowlist explicitly includes `https://interlock-recall.vercel.app`, deployment host and localhost; it forwards the auth-server Origin and preserves the app host as `x-forwarded-host`.
 - Env: `INTERLOCK_ENVIRONMENT=production`, `INTERLOCK_EXECUTION_MODE=simulation`, `INTERLOCK_DEMO_BASELINE_ENABLED=false`, fresh `INTERLOCK_SIGNING_SECRET`, `APP_BASE_URL=https://interlock-recall.vercel.app`.
 - `/demo` returns **404** in production. `/api/health` returns production/simulation/baseline=false.
 - Production currently uses the provided preview `DATABASE_URL_APP` and `MEMWAL_NAMESPACE=interlock` because the finalization instruction required the same `.env.local` values except the listed flags. This is synthetic hackathon data; separate Neon/Walrus isolation and a verified backup path remain required before real customer data.
